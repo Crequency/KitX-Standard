@@ -1,15 +1,6 @@
 [submodule "KitX Contracts"]
 	path = KitX Contracts
 	url = git@github.com:Crequency/KitX-Contracts.git
-[submodule "KitX File Formats"]
-	path = KitX File Formats
-	url = git@github.com:Crequency/KitX-File-Formats.git
-[submodule "KitX Loaders"]
-	path = KitX Loaders
-	url = git@github.com:Crequency/KitX-Loaders.git
-[submodule "KitX Plugins"]
-	path = KitX Plugins
-	url = git@github.com:Crequency/KitX-Plugins.git
 [submodule "KitX Script"]
 	path = KitX Script
 	url = git@github.com:Crequency/KitX-Script.git
