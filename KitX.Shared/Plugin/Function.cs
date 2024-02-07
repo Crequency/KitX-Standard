@@ -12,5 +12,5 @@ public struct Function
 
     public string ReturnValueType { get; set; }
 
-    public bool IsVoidable => ReturnValueType.Equals("void");
+    public readonly bool IsVoidable => ReturnValueType.Equals("void");
 }

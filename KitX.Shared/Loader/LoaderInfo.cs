@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using KitX.Shared.Device;
+﻿using KitX.Shared.Device;
+using System.Collections.Generic;
 
 namespace KitX.Shared.Loader;
 

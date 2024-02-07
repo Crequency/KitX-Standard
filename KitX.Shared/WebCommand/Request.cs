@@ -1,5 +1,5 @@
-﻿using KitX.Shared.WebCommand.Infos;
-using KitX.Shared.Device;
+﻿using KitX.Shared.Device;
+using KitX.Shared.WebCommand.Infos;
 
 namespace KitX.Shared.WebCommand;
 

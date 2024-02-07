@@ -10,7 +10,7 @@
     <PropertyGroup>
         <AssemblyVersion>$(Version)</AssemblyVersion>
         <FileVersion>$(Version)</FileVersion>
-        <Version>24.10.$([System.DateTime]::UtcNow.Date.Subtract($([System.DateTime]::Parse("2024-02-08"))).TotalDays).$([System.Math]::Floor($([System.DateTime]::UtcNow.TimeOfDay.TotalMinutes)))</Version>
+        <Version>24.10.$([System.DateTime]::UtcNow.Date.Subtract($([System.DateTime]::Parse("2024-02-07"))).TotalDays).$([System.Math]::Floor($([System.DateTime]::UtcNow.TimeOfDay.TotalMinutes)))</Version>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -27,7 +27,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="KitX-Background-ani.png" />
+        <None Include="KitX-Background-ani.png">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </None>
         <None Update="README.md">
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>
