@@ -13,5 +13,6 @@ public enum OperatingSystems
     TvOS = 8,
     WatchOS = 9,
     Windows = 10,
-    IoT = 11
+    IoT = 11,
+    AppleVisionOS = 12,
 }
