@@ -8,7 +8,7 @@ public struct DeviceInfo
 
     public string DeviceOSVersion { get; set; }
 
-    public int PluginServerPort { get; set; }
+    public int PluginsServerPort { get; set; }
 
     public int PluginsCount { get; set; }
 
@@ -18,7 +18,7 @@ public struct DeviceInfo
 
     public int DevicesServerPort { get; set; }
 
-    public DateTime DeviceServerBuildTime { get; set; }
+    public DateTime DevicesServerBuildTime { get; set; }
 
     public OperatingSystems DeviceOSType { get; set; }
 }
