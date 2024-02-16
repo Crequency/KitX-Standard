@@ -17,8 +17,8 @@ abstract class DeviceLocator implements Built<DeviceLocator, DeviceLocatorBuilde
   @BuiltValueField(wireName: 'IPv6')
   String get iPv6;
 
-  @BuiltValueField(wireName: 'DeviceMacAddress')
-  String get deviceMacAddress;
+  @BuiltValueField(wireName: 'MacAddress')
+  String get macAddress;
 
   DeviceLocator._();
   factory DeviceLocator([void Function(DeviceLocatorBuilder) updates]) = _$DeviceLocator;

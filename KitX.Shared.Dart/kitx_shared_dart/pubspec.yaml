@@ -1,6 +1,6 @@
 name: kitx_shared_dart
 description: A port of KitX.Shared in dart
-version: 3.24.10+6829
+version: 3.24.10+6829-patch-1
 repository: https://github.com/Crequency/KitX-Standard/KitX.Shared.Dart/
 
 environment:
