@@ -1,8 +1,7 @@
-/// Support for doing something awesome.
-///
-/// More dartdocs go here.
 library;
 
-export 'src/kitx_shared_dart_base.dart';
+export 'device/device_info.dart';
+export 'device/device_locator.dart';
+export 'device/operating_systems.dart';
 
-// TODO: Export any libraries intended for clients of this package.
+export 'serializers.dart';
