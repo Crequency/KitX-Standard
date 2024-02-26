@@ -3,26 +3,26 @@ using System.Collections.Generic;
 
 namespace KitX.Shared.Loader;
 
-public struct LoaderInfo
+public class LoaderInfo
 {
     public bool SelfLoad { get; set; }
 
-    public string LoaderName { get; set; }
+    public string LoaderName { get; set; } = string.Empty;
 
-    public string LoaderVersion { get; set; }
+    public string LoaderVersion { get; set; } = string.Empty;
 
-    public string LoaderLanguage { get; set; }
+    public string LoaderLanguage { get; set; } = string.Empty;
 
-    public string LoaderFramework { get; set; }
+    public string LoaderFramework { get; set; } = string.Empty;
 
-    public RunType LoaderRunType { get; set; }
+    public LoaderRunType LoaderRunType { get; set; }
 
-    public List<OperatingSystems> SupportOS { get; set; }
+    public List<OperatingSystems> SupportOS { get; set; } = [];
 
-    public enum RunType
-    {
-        Console, Desktop, Browser
-    }
+    public Dictionary<string, string> Tags { get; set; } = [];
+}
 
-    public Dictionary<string, string> Tags { get; set; }
+public enum LoaderRunType
+{
+    Console, Desktop, Browser
 }

@@ -1,14 +1,14 @@
 ﻿namespace KitX.Shared.Device;
 
-public struct DeviceLocator
+public class DeviceLocator
 {
-    public string DeviceName { get; set; }
+    public string DeviceName { get; set; } = string.Empty;
 
-    public string IPv4 { get; set; }
+    public string IPv4 { get; set; } = string.Empty;
 
-    public string IPv6 { get; set; }
+    public string IPv6 { get; set; } = string.Empty;
 
-    public string MacAddress { get; set; }
+    public string MacAddress { get; set; } = string.Empty;
 
     public DeviceLocator ResetDeviceName(string name)
     {
