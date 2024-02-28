@@ -1,1 +1,1 @@
-﻿# KitX Standard
+# KitX Standard
