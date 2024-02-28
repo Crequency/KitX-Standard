@@ -2,11 +2,11 @@
 
 namespace KitX.Shared.Device;
 
-public struct DeviceInfo
+public class DeviceInfo
 {
-    public DeviceLocator Device { get; set; }
+    public DeviceLocator Device { get; set; } = new();
 
-    public string DeviceOSVersion { get; set; }
+    public string DeviceOSVersion { get; set; } = string.Empty;
 
     public int PluginsServerPort { get; set; }
 
