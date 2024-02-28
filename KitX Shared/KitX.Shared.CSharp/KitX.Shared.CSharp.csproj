@@ -14,10 +14,10 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <Title>KitX.Contract.CSharp</Title>
+        <Title>KitX.Shared.CSharp</Title>
         <Authors>Dynesshely</Authors>
         <Company>Crequency</Company>
-        <Description>Contract of KitX Plugins written in C#</Description>
+        <Description>KitX Shared Components</Description>
         <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
         <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
         <PackageIcon>KitX-Background-ani.png</PackageIcon>
@@ -35,14 +35,6 @@
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>
         </None>
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="System.ComponentModel.Composition" Version="6.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\..\KitX Shared\KitX.Shared.CSharp\KitX.Shared.CSharp.csproj" />
     </ItemGroup>
 
 </Project>

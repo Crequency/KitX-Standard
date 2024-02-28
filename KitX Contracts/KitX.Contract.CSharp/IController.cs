@@ -1,5 +1,5 @@
-﻿using KitX.Shared.WebCommand;
-using KitX.Shared.WebCommand.Details;
+﻿using KitX.Shared.CSharp.WebCommand;
+using KitX.Shared.CSharp.WebCommand.Details;
 using System;
 
 namespace KitX.Contract.CSharp;
