@@ -1,6 +1,0 @@
-[submodule "KitX Contracts"]
-	path = KitX Contracts
-	url = git@github.com:Crequency/KitX-Contracts.git
-[submodule "KitX Script"]
-	path = KitX Script
-	url = git@github.com:Crequency/KitX-Script.git
