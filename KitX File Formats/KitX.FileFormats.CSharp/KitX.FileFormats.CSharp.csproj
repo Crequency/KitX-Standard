@@ -14,15 +14,15 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <Title>KitX.Contract.CSharp</Title>
-        <Authors>Dynesshely</Authors>
+        <Title>KitX.FileFormats.CSharp</Title>
         <Company>Crequency</Company>
-        <Description>Contract of KitX Plugins written in C#</Description>
+        <Authors>Dynesshely</Authors>
+        <Description>KitX File Formats' Encoders/Decoders</Description>
         <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
         <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
         <PackageIcon>KitX-Background-ani.png</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageProjectUrl>https://github.com/Crequency/KitX/</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/Crequency/KitX-Standard/</PackageProjectUrl>
         <RepositoryUrl>https://github.com/Crequency/KitX-Standard/</RepositoryUrl>
     </PropertyGroup>
 
@@ -38,11 +38,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="System.ComponentModel.Composition" Version="6.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\..\KitX Shared\KitX.Shared.CSharp\KitX.Shared.CSharp.csproj" />
+        <PackageReference Include="CommandLineParser" Version="2.9.1" />
     </ItemGroup>
 
 </Project>

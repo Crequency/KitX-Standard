@@ -1,4 +1,4 @@
-﻿using KitX.Shared.Plugin;
+﻿using KitX.Shared.CSharp.Plugin;
 using System.ComponentModel.Composition;
 
 namespace KitX.Contract.CSharp;
