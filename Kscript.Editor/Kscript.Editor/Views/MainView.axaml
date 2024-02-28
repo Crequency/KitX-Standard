@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="Kscript.Editor.Views.MainView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="using:Kscript.Editor.ViewModels"
+             d:DesignHeight="450"
+             d:DesignWidth="800"
+             Background="#171C2C"
+             Foreground="White"
+             mc:Ignorable="d">
+
+    <!--
+        xmlns:dc="using:Dock.Avalonia.Controls"
+        xmlns:dm="using:Dock.Model.Core"
+        xmlns:dmr="using:Dock.Model.ReactiveUI.Controls"
+        xmlns:dps="using:Dock.ProportionalStackPanel"
+    -->
+
+    <Design.DataContext>
+        <viewModels:MainViewModel/>
+    </Design.DataContext>
+
+    <Grid>
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial BackgroundSource="Digger"
+                                             MaterialOpacity="{Binding MaterialOpacity}"
+                                             TintColor="{Binding BackgroundTintColor}"
+                                             TintOpacity="{Binding BackgroundTintOpacity}"/>
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+
+        <Button HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Command="{Binding UpdateVMCommand}"
+                Content="{Binding Content}"/>
+    </Grid>
+</UserControl>
