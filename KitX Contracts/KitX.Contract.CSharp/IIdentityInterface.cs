@@ -1,5 +1,5 @@
-﻿using KitX.Shared.CSharp.Plugin;
-using System.ComponentModel.Composition;
+﻿using System.ComponentModel.Composition;
+using KitX.Shared.CSharp.Plugin;
 
 namespace KitX.Contract.CSharp;
 

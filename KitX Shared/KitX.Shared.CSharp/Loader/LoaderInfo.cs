@@ -1,5 +1,5 @@
-﻿using KitX.Shared.CSharp.Device;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using KitX.Shared.CSharp.Device;
 
 namespace KitX.Shared.CSharp.Loader;
 
