@@ -1,4 +1,6 @@
-﻿namespace KitX.Shared.CSharp.Device;
+﻿using System;
+
+namespace KitX.Shared.CSharp.Device;
 
 public class DeviceLocator
 {
@@ -33,4 +35,20 @@ public class DeviceLocator
         MacAddress = mac;
         return this;
     }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is not DeviceLocator target)
+            throw new InvalidOperationException($"Currently you can not compare {nameof(DeviceLocator)} with other types.");
+
+        var result = DeviceName.Equals(target.DeviceName) &&
+            IPv4.Equals(target.IPv4) &&
+            IPv6.Equals(target.IPv6) &&
+            MacAddress.Equals(target.MacAddress)
+            ;
+
+        return result;
+    }
+
+    public override int GetHashCode() => base.GetHashCode();
 }
