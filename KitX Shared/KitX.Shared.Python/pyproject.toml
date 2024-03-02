@@ -1,0 +1,21 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "kitx-shared-python"
+# Auto generated version  DO NOT EDIT!!!
+version = "3.24.10.6844"
+authors = [
+    {name = "cranyozen", email = "cranyozen@foxmail.com"}
+]
+readme = "README.md"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+]
+license = { file = "LICENSE" }
+dynamic = ["description"]
+
+[project.urls]
+Home = "https://github.com/Crequency/KitX-Standard/tree/main/KitX%20Shared/KitX.Shared.Python"
