@@ -52,3 +52,10 @@ public class DeviceLocator
 
     public override int GetHashCode() => base.GetHashCode();
 }
+
+public static class DeviceLocatorExtensions
+{
+    public static bool IsSameDevice(this DeviceLocator current, DeviceLocator target)
+        => current.DeviceName.Equals(target.DeviceName)
+        && current.MacAddress.Equals(target.MacAddress);
+}
