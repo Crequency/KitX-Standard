@@ -14,6 +14,8 @@ public struct Command
 
     public int BodyLength { get; set; }
 
+    public string PluginConnectionId { get; set; }
+
     public string FunctionName { get; set; }
 
     public List<Parameter> FunctionArgs { get; set; }

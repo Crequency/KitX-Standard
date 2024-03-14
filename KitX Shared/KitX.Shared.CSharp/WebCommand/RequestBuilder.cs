@@ -55,7 +55,7 @@ public class RequestBuilder
         return this;
     }
 
-    private Request Build()
+    public Request Build()
     {
         _request.Content = _serializer?.Invoke(_command) ?? throw new ArgumentNullException(nameof(Serializer));
 

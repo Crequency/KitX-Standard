@@ -1,10 +1,15 @@
 ﻿namespace KitX.Shared.CSharp.WebCommand.Infos;
 
-public struct EncryptionInfo
+public class EncryptionInfo
 {
-    public bool IsEncrypted { get; set; }
+    public bool IsEncrypted { get; set; } = false;
 
-    public string EncryptionMethod { get; set; }
+    public EncryptionMethods EncryptionMethod { get; set; } = EncryptionMethods.RSA;
+}
 
-    public string EncryptionKeyId { get; set; }
+public enum EncryptionMethods
+{
+    Custom = 0,
+    RSA = 1,
+    AES = 2,
 }
