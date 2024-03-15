@@ -7,28 +7,20 @@ namespace KitX.FileFormats.CSharp.ExtensionsPackage;
 
 using File = System.IO.File;
 
-public class Encoder
-{
-    public Encoder(
-        List<string> filesToInclude,
-        string loaderStruct,
-        string pluginStruct,
-        Options? options = null
+public class Encoder(
+    List<string> filesToInclude,
+    string loaderStruct,
+    string pluginStruct,
+    Options? options = null
     )
-    {
-        FilesToInclude = filesToInclude;
-        LoaderStruct = loaderStruct;
-        PluginStruct = pluginStruct;
-        Options = options ?? new();
-    }
+{
+    public List<string> FilesToInclude { get; set; } = filesToInclude;
 
-    public List<string> FilesToInclude { get; set; }
+    public string LoaderStruct { get; set; } = loaderStruct;
 
-    public string LoaderStruct { get; set; }
+    public string PluginStruct { get; set; } = pluginStruct;
 
-    public string PluginStruct { get; set; }
-
-    public Options Options { get; set; }
+    public Options Options { get; set; } = options ?? new();
 
     /// <summary>
     /// 编码包体

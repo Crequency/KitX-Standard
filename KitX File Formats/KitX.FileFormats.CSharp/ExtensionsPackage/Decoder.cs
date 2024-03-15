@@ -6,18 +6,11 @@ using System.Text;
 
 namespace KitX.FileFormats.CSharp.ExtensionsPackage;
 
-public class Decoder
+public class Decoder(string packagePath, Options? options = null)
 {
-    public Decoder(string packagePath, Options? options = null)
-    {
-        PackagePath = packagePath;
+    public string PackagePath { get; set; } = packagePath;
 
-        Options = options ?? new();
-    }
-
-    public string PackagePath { get; set; }
-
-    public Options Options { get; set; }
+    public Options Options { get; set; } = options ?? new();
 
     internal struct FileMapItem
     {
