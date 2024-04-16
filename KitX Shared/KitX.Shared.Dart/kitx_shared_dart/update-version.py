@@ -18,7 +18,7 @@ def calculateLatestVersionBuildNumber():
 
 def updateVersion():
     ver = calculateLatestVersionBuildNumber()
-    pattern = re.compile(r"^version: \d+.\d+.\d+\+\d+(-[a-zA-Z0-9-]+)$")
+    pattern = re.compile(r"^version: \d+\.\d+\.\d+\+\d+(-[a-zA-Z0-9-]+)?$")
     temp_lines = []
 
     with open(file_pubspec, "r") as file:

@@ -52,7 +52,10 @@ abstract class DeviceInfo implements Built<DeviceInfo, DeviceInfoBuilder> {
   }
 
   static DeviceInfo? fromString(String jsonString) {
-    DeviceInfo? result = serializers.deserializeWith(DeviceInfo.serializer, json.decode(jsonString));
+    DeviceInfo? result = serializers.deserializeWith(
+      DeviceInfo.serializer,
+      json.decode(jsonString),
+    );
     return result;
   }
 
