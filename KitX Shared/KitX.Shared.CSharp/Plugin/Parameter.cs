@@ -12,5 +12,5 @@ public struct Parameter
 
     public string Value { get; set; }
 
-    public bool IsAppendable { get; set; }
+    public bool IsOptional { get; set; }
 }
