@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
+        <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -31,7 +31,7 @@
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>
         </None>
-        <None Update="README.md">
+        <None Include="README.md">
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>
         </None>
@@ -42,7 +42,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\KitX Shared\KitX.Shared.CSharp\KitX.Shared.CSharp.csproj" />
+        <ProjectReference Include="..\..\KitX Shared\KitX.Shared.CSharp\KitX.Shared.CSharp.csproj" />
     </ItemGroup>
 
 </Project>
