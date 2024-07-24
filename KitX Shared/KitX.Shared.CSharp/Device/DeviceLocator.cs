@@ -39,7 +39,8 @@ public class DeviceLocator
     public override bool Equals(object obj)
     {
         if (obj is not DeviceLocator target)
-            throw new InvalidOperationException($"Currently you can not compare {nameof(DeviceLocator)} with other types.");
+            return false;
+        //throw new InvalidOperationException($"Currently you can not compare {nameof(DeviceLocator)} with other types.");
 
         var result = DeviceName.Equals(target.DeviceName) &&
             IPv4.Equals(target.IPv4) &&
