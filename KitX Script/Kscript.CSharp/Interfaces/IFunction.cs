@@ -1,4 +1,4 @@
-using KitX.Shared.CSharp.Plugin;
+﻿using KitX.Shared.CSharp.Plugin;
 
 namespace Kscript.CSharp.Interfaces
 {
@@ -6,8 +6,7 @@ namespace Kscript.CSharp.Interfaces
     {
         Function Info { get; }
         PluginInfo AssociatedPlugin { get; }
-        Task<object> Invoke(params object[] parameters);
-        bool ValidateParameters(object[] parameters);
+        Task<object> Invoke(params string[] parameters);
         Type GetReturnType();
     }
 }

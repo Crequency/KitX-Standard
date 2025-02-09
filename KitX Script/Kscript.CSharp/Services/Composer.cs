@@ -1,41 +1,41 @@
-using KitX.Shared.CSharp.Device;
+﻿using KitX.Shared.CSharp.Device;
+using KitX.Shared.CSharp.WebCommand;
 using Kscript.CSharp.Interfaces;
 
 namespace Kscript.CSharp.Services
 {
     public class Composer : IComposer
     {
-        private readonly NetworkConnector _connector = NetworkConnector.Instance;
-        private IEnumerable<DeviceInfo> _cachedDeviceList;
+        private readonly Connector _connector = Connector.Instance;
+        private IEnumerable<DeviceInfo>? _cachedDeviceList;
 
-        public async Task<IDevice> RequestLocalDevice()
-        {
-            var deviceInfo = await _connector.GetLocalDeviceInfo();
-            return new Device(deviceInfo);
-        }
+        public async Task<IDevice> RequestLocalDevice() => throw new NotImplementedException();
 
-        public async Task<IDevice> RequestMainController()
+        public async Task<IDevice?> RequestMainController()
         {
             var devices = await RequestDeviceList();
-            var mainController = devices.FirstOrDefault(x => x.IsMainController);
+            var mainController = devices.FirstOrDefault(x => x.IsMainDevice);
             return mainController != null ? new Device(mainController) : null;
         }
 
-        public async Task<IDevice> RequestRandomDesktopDevice()
+        public async Task<IDevice?> RequestRandomDesktopDevice()
         {
             var devices = await RequestDeviceList();
-            var desktopDevices = devices.Where(x => x.IsDesktopDevice).ToList();
+            var desktopDevices = devices.Where(x => x.DeviceOSType == OperatingSystems.Windows
+                                                                                                || x.DeviceOSType == OperatingSystems.MacOS
+                                                                                                || x.DeviceOSType == OperatingSystems.Linux).ToList();
             if (!desktopDevices.Any()) return null;
-            
+
             var random = new Random();
             var randomDevice = desktopDevices[random.Next(desktopDevices.Count)];
             return new Device(randomDevice);
         }
 
-        public async Task<IDevice> RequestRandomMobileDevice()
+        public async Task<IDevice?> RequestRandomMobileDevice()
         {
             var devices = await RequestDeviceList();
-            var mobileDevices = devices.Where(x => x.IsMobileDevice).ToList();
+            var mobileDevices = devices.Where(x => x.DeviceOSType == OperatingSystems.Android
+                                                                                               || x.DeviceOSType == OperatingSystems.IOS).ToList();
             if (!mobileDevices.Any()) return null;
             
             var random = new Random();
@@ -43,25 +43,29 @@ namespace Kscript.CSharp.Services
             return new Device(randomDevice);
         }
 
-        public async Task<IDevice> RequestDeviceByFilter(Func<DeviceInfo, bool> filter)
+        public async Task<IDevice?> RequestDeviceByFilter(Func<DeviceInfo, bool> filter)
         {
             var devices = await RequestDeviceList();
             var matchedDevice = devices.FirstOrDefault(filter);
             return matchedDevice != null ? new Device(matchedDevice) : null;
         }
 
-        public async Task<IDevice> RequestUserSelectedDevice(IEnumerable<DeviceInfo> candidates)
+        // todo: implement this method
+        public Task<IDevice?> RequestUserSelectedDevice(IEnumerable<DeviceInfo> candidates) => throw new NotImplementedException();
+
+        public async Task<IEnumerable<DeviceInfo>> RequestDeviceList() => throw new NotImplementedException();
+
+        private async Task HandleResponse(Request response)
         {
-            // 这里需要调用本地UI让用户选择设备
-            // 简化实现，返回第一个设备
-            var device = candidates.FirstOrDefault();
-            return device != null ? new Device(device) : null;
+            response.Match(
+                response.GetContent(content => content), // 这里需要提供实际的解密函数
+                matchCommand: ProcessCommandResponse
+            );
         }
 
-        public async Task<IEnumerable<DeviceInfo>> RequestDeviceList()
+        private void ProcessCommandResponse(string content)
         {
-            _cachedDeviceList = await _connector.GetDeviceList();
-            return _cachedDeviceList;
+            // 处理命令响应
         }
     }
 }

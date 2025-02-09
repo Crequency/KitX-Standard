@@ -1,4 +1,4 @@
-using KitX.Shared.CSharp.Device;
+﻿using KitX.Shared.CSharp.Device;
 using KitX.Shared.CSharp.Plugin;
 
 namespace Kscript.CSharp.Interfaces
@@ -9,7 +9,7 @@ namespace Kscript.CSharp.Interfaces
         DeviceInfo AssociatedDevice { get; }
         Task<IFunction> RequestFunction(string idOrName);
         Task<IEnumerable<IFunction>> GetFunctionList();
-        Task<IFunction> GetFunctionByType(string type);
+        Task<IFunction?> GetFunctionByType(string type);
         Task<object> ExecuteFunction(string functionName, params object[] parameters);
         bool HasFunction(string idOrName);
     }

@@ -1,60 +1,48 @@
-using KitX.Shared.CSharp.Device;
+﻿using KitX.Shared.CSharp.Device;
 using KitX.Shared.CSharp.Plugin;
+using KitX.Shared.CSharp.WebCommand;
 using Kscript.CSharp.Interfaces;
 
 namespace Kscript.CSharp.Services
 {
     public class Function : IFunction
     {
-        private readonly NetworkConnector _connector;
+        private readonly Connector _connector = Connector.Instance;
         private readonly DeviceInfo _deviceInfo;
 
-        public Function Info { get; }
+        public KitX.Shared.CSharp.Plugin.Function Info { get; }
         public PluginInfo AssociatedPlugin { get; }
 
-        public Function(KitX.Shared.CSharp.Plugin.Function info, PluginInfo pluginInfo, 
-            DeviceInfo deviceInfo, NetworkConnector connector)
+        public Function(KitX.Shared.CSharp.Plugin.Function info, PluginInfo pluginInfo, DeviceInfo deviceInfo)
         {
             Info = info;
             AssociatedPlugin = pluginInfo;
             _deviceInfo = deviceInfo;
-            _connector = connector;
         }
 
-        public async Task<object> Invoke(params object[] parameters)
+        public async Task<object> Invoke(params string[] parameters)
         {
-            if (!ValidateParameters(parameters))
-            {
-                throw new ArgumentException("Invalid parameters");
-            }
-
-            return await _connector.ExecuteFunction(
-                _deviceInfo.Id,
-                AssociatedPlugin.Id,
-                Info.Name,
-                parameters
-            );
-        }
-
-        public bool ValidateParameters(object[] parameters)
-        {
-            if (parameters.Length != Info.Parameters.Length)
-                return false;
-
-            for (int i = 0; i < parameters.Length; i++)
-            {
-                if (!Info.Parameters[i].ParameterType.IsInstanceOfType(parameters[i]))
+            _connector.Request()
+                .UpdateCommand(cmd =>
                 {
-                    return false;
-                }
-            }
+                    cmd.FunctionName = Info.Name;
+                    cmd.FunctionArgs = parameters.Select(p => new Parameter { Value = p }).ToList();
+                    return cmd;
+                })
+                .UpdateRequest(req =>
+                {
+                    req.Target = _deviceInfo.Device;
+                    return req;
+                })
+                .Send();
 
-            return true;
+            // 等待并处理响应
+            return null; // 需要处理实际响应
         }
 
         public Type GetReturnType()
         {
-            return Type.GetType(Info.ReturnType) ?? typeof(object);
+            return Type.GetType(Info.ReturnValueType) ?? typeof(object);
         }
     }
 }

@@ -21,4 +21,8 @@
         <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
         <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\KitX Shared\KitX.Shared.CSharp\KitX.Shared.CSharp.csproj" />
+    </ItemGroup>
 </Project>
