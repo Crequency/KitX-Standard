@@ -17,21 +17,21 @@ namespace Kscript.CSharp.Services
             Info = info;
         }
 
-        public async Task<IPlugin> RequestPlugin(string idOrName)
+        public async Task<IPlugin> RequestPlugin(string Name)
         {
             var plugins = await GetPluginList();
             var pluginInfo = plugins.FirstOrDefault(p => 
-                p.Name.Equals(idOrName, StringComparison.OrdinalIgnoreCase));
+                p.Name.Equals(Name, StringComparison.OrdinalIgnoreCase));
             
             return pluginInfo != null ? await CreatePluginInstance(pluginInfo) : null;
         }
 
         public async Task<IEnumerable<PluginInfo>> GetPluginList() => throw new NotImplementedException();
 
-        public bool HasPlugin(string idOrName)
+        public bool HasPlugin(string Name)
         {
             return _pluginCache.Values.Any(p => 
-                p.Name.Equals(idOrName, StringComparison.OrdinalIgnoreCase));
+                p.Name.Equals(Name, StringComparison.OrdinalIgnoreCase));
         }
 
         public async Task<IPlugin> CreatePluginInstance(PluginInfo info)

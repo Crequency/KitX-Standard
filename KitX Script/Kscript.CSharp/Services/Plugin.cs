@@ -8,7 +8,6 @@ namespace Kscript.CSharp.Services
     public class Plugin : IPlugin
     {
         private readonly Connector _connector = Connector.Instance;
-        private readonly Dictionary<string, Function> _functionCache = new();
 
         public PluginInfo Info { get; }
         public DeviceInfo AssociatedDevice { get; }
@@ -19,18 +18,18 @@ namespace Kscript.CSharp.Services
             AssociatedDevice = deviceInfo;
         }
 
-        public async Task<IFunction> RequestFunction(string idOrName)
+        public async Task<IFunction> RequestFunction(string Name)
         {
             var functions = await GetFunctionList();
             var function = functions.FirstOrDefault(f => 
-                f.Info.Name.Equals(idOrName, StringComparison.OrdinalIgnoreCase));
+                f.Info.Name.Equals(Name, StringComparison.OrdinalIgnoreCase));
             return function;
         }
 
         public async Task<IEnumerable<IFunction>> GetFunctionList()
         {
             var functions = Info.Functions.Select(f => 
-                new Function(f, Info, AssociatedDevice, _connector) as IFunction);
+                new Function(f, Info, AssociatedDevice) as IFunction);
             return await Task.FromResult(functions);
         }
 
@@ -41,19 +40,18 @@ namespace Kscript.CSharp.Services
                 f.Info.ReturnValueType.Equals(type, StringComparison.OrdinalIgnoreCase));
         }
 
-        public async Task<object> ExecuteFunction(string functionName, params object[] parameters)
+        public async Task<object> ExecuteFunction(string functionName, params string[] parameters)
         {
             _connector.Request()
                 .UpdateCommand(cmd =>
                 {
-                    cmd.PluginConnectionId = Info.Id;
                     cmd.FunctionName = functionName;
                     cmd.FunctionArgs = parameters.Select(p => new Parameter { Value = p }).ToList();
                     return cmd;
                 })
                 .UpdateRequest(req =>
                 {
-                    req.Target = new DeviceLocator { Id = AssociatedDevice.Id };
+                    req.Target = AssociatedDevice.Device;
                     return req;
                 })
                 .Send();
@@ -62,10 +60,10 @@ namespace Kscript.CSharp.Services
             return null; // 需要处理实际响应
         }
 
-        public bool HasFunction(string idOrName)
+        public bool HasFunction(string Name)
         {
             return Info.Functions.Any(f => 
-                f.Name.Equals(idOrName, StringComparison.OrdinalIgnoreCase));
+                f.Name.Equals(Name, StringComparison.OrdinalIgnoreCase));
         }
     }
 }
