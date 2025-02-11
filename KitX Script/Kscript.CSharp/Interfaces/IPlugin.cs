@@ -7,7 +7,7 @@ namespace Kscript.CSharp.Interfaces
     {
         PluginInfo Info { get; }
         DeviceInfo AssociatedDevice { get; }
-        Task<IFunction> RequestFunction(string idOrName);
+        Task<IFunction?> RequestFunction(string idOrName);
         Task<IEnumerable<IFunction>> GetFunctionList();
         Task<IFunction?> GetFunctionByType(string type);
         Task<object> ExecuteFunction(string functionName, params string[] parameters);

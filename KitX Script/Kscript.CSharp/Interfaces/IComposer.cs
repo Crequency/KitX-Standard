@@ -4,7 +4,7 @@ namespace Kscript.CSharp.Interfaces
 {
     public interface IComposer
     {
-        Task<IDevice> RequestLocalDevice();
+        Task<IDevice?> RequestLocalDevice();
         Task<IDevice?> RequestMainController();
         Task<IDevice?> RequestRandomDesktopDevice();
         Task<IDevice?> RequestRandomMobileDevice();
