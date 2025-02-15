@@ -8,7 +8,12 @@ namespace Kscript.CSharp.Services
 {
     public class Composer : IComposer
     {
-        private readonly Connector _connector = Connector.Instance;
+        private readonly Connector _connector;
+
+        public Composer(Connector? connector = null)
+        {
+            _connector = connector ?? Connector.Instance;
+        }
         private IEnumerable<DeviceInfo>? _cachedDeviceList;
 
         public async Task<IDevice?> RequestLocalDevice()
@@ -98,7 +103,7 @@ namespace Kscript.CSharp.Services
                 .UpdateCommand(cmd =>
                 {
                     cmd.FunctionName = "SelectDevice";
-                    cmd.FunctionArgs = candidates.Select(d => new Parameter { Value = d.ToString() }).ToList();
+                    cmd.FunctionArgs = candidates.Select(d => new Parameter { Value = d.ToString() }).ToList(); // todo: 改为传入一个函数用于筛选设备
                     return cmd;
                 })
                 .UpdateRequest(req =>

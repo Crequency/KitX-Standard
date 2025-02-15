@@ -1,4 +1,4 @@
-﻿using KitX.Shared.CSharp.Device;
+﻿﻿using KitX.Shared.CSharp.Device;
 using KitX.Shared.CSharp.Plugin;
 using KitX.Shared.CSharp.WebCommand;
 using Kscript.CSharp.Interfaces;
@@ -7,15 +7,16 @@ namespace Kscript.CSharp.Services
 {
     public class Plugin : IPlugin
     {
-        private readonly Connector _connector = Connector.Instance;
+        private readonly Connector _connector;
 
         public PluginInfo Info { get; }
         public DeviceInfo AssociatedDevice { get; }
 
-        public Plugin(PluginInfo info, DeviceInfo deviceInfo)
+        public Plugin(PluginInfo info, DeviceInfo deviceInfo, Connector? connector = null)
         {
             Info = info;
             AssociatedDevice = deviceInfo;
+            _connector = connector ?? Connector.Instance;
         }
 
         public async Task<IFunction> RequestFunction(string Name)
@@ -29,7 +30,7 @@ namespace Kscript.CSharp.Services
         public async Task<IEnumerable<IFunction>> GetFunctionList()
         {
             var functions = Info.Functions.Select(f => 
-                new Function(f, Info, AssociatedDevice) as IFunction);
+                new Function(f, Info, AssociatedDevice, _connector) as IFunction);
             return await Task.FromResult(functions);
         }
 
@@ -105,7 +106,7 @@ namespace Kscript.CSharp.Services
             var function = Info.Functions.FirstOrDefault(f => 
                 f.Name.Equals(functionName, StringComparison.OrdinalIgnoreCase));
             
-            if (function == null)
+            if (function.Equals(default(Function)))
                 throw new InvalidOperationException($"Function '{functionName}' not found in plugin '{Info.Name}'");
 
             // Try to get the type from the assembly first

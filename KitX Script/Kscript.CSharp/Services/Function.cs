@@ -7,17 +7,18 @@ namespace Kscript.CSharp.Services
 {
     public class Function : IFunction
     {
-        private readonly Connector _connector = Connector.Instance;
+        private readonly Connector _connector;
         private readonly DeviceInfo _deviceInfo;
 
         public KitX.Shared.CSharp.Plugin.Function Info { get; }
         public PluginInfo AssociatedPlugin { get; }
 
-        public Function(KitX.Shared.CSharp.Plugin.Function info, PluginInfo pluginInfo, DeviceInfo deviceInfo)
+        public Function(KitX.Shared.CSharp.Plugin.Function info, PluginInfo pluginInfo, DeviceInfo deviceInfo, Connector? connector = null)
         {
             Info = info;
             AssociatedPlugin = pluginInfo;
             _deviceInfo = deviceInfo;
+            _connector = connector ?? Connector.Instance;
         }
 
         public async Task<object> Invoke(params string[] parameters)

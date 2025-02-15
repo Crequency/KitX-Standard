@@ -8,14 +8,15 @@ namespace Kscript.CSharp.Services
 {
     public class Device : IDevice
     {
-        private readonly Connector _connector = Connector.Instance;
+        private readonly Connector _connector;
         private Dictionary<string, PluginInfo> _pluginCache = new();
         
         public DeviceInfo Info { get; }
 
-        public Device(DeviceInfo info)
+        public Device(DeviceInfo info, Connector? connector = null)
         {
             Info = info;
+            _connector = connector ?? Connector.Instance;
         }
 
         public async Task<IPlugin> RequestPlugin(string Name)
@@ -117,7 +118,7 @@ namespace Kscript.CSharp.Services
 
         public async Task<IPlugin> CreatePluginInstance(PluginInfo info)
         {
-            return new Plugin(info, Info);
+            return new Plugin(info, Info, _connector);
         }
     }
 }
