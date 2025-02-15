@@ -2,207 +2,262 @@
 using KitX.Shared.CSharp.Plugin;
 using KitX.Shared.CSharp.WebCommand;
 using Kscript.CSharp.Interfaces;
+using Kscript.CSharp.Utils;
 using System.Text.Json;
 
 namespace Kscript.CSharp.Services
 {
-    public class Composer : IComposer
+    /// <summary>
+    /// 设备管理器
+    /// </summary>
+    public class Composer : IComposer, IDisposable
     {
         private readonly Connector _connector;
+        private readonly DeviceCache _deviceCache;
+        private readonly DeviceRequestBuilder _requestBuilder;
+        private readonly HashSet<IDeviceEventListener> _listeners = new();
+        private bool _isDisposed;
+
+        private readonly object _lockObject = new();
+        private Dictionary<string, DeviceInfo> _lastKnownDevices = new();
+        
+        // 设备离线判断阈值（超过这个时间没有收到更新则认为设备离线）
+        private static readonly TimeSpan DeviceOfflineThreshold = TimeSpan.FromMinutes(2);
 
         public Composer(Connector? connector = null)
         {
             _connector = connector ?? Connector.Instance;
+            _deviceCache = new DeviceCache();
+            _requestBuilder = new DeviceRequestBuilder(_connector);
         }
-        private IEnumerable<DeviceInfo>? _cachedDeviceList;
 
+        /// <summary>
+        /// 添加设备事件监听器
+        /// </summary>
+        public void AddListener(IDeviceEventListener listener)
+        {
+            if (_isDisposed)
+                throw new ObjectDisposedException(nameof(Composer));
+
+            lock (_lockObject)
+            {
+                _listeners.Add(listener);
+            }
+        }
+
+        /// <summary>
+        /// 移除设备事件监听器
+        /// </summary>
+        public void RemoveListener(IDeviceEventListener listener)
+        {
+            if (_isDisposed)
+                return;
+
+            lock (_lockObject)
+            {
+                _listeners.Remove(listener);
+            }
+        }
+
+        /// <summary>
+        /// 获取本地设备
+        /// </summary>
         public async Task<IDevice?> RequestLocalDevice()
         {
             var devices = await RequestDeviceList();
-            var localDevice = devices.FirstOrDefault(x => 
-                (x.Device.IPv4?.Equals("127.0.0.1") ?? false) || // Check localhost
-                (x.Device.IPv4?.Equals("::1") ?? false)); // Check IPv6 localhost
-                                                          // todo: fixme: 这个检查方案会有问题。改进建议：检查IP地址是否与本地设备的IP地址有交集。因为广播出来的地址可能是本机地址的外网地址
-
-            return localDevice != null ? new Device(localDevice) : null;
+            var localDevice = devices.FirstOrDefault(NetworkUtils.IsLocalDevice);
+            return localDevice != null ? new Device(localDevice, _connector) : null;
         }
 
+        /// <summary>
+        /// 获取主控制器设备
+        /// </summary>
         public async Task<IDevice?> RequestMainController()
         {
             var devices = await RequestDeviceList();
             var mainController = devices.FirstOrDefault(x => x.IsMainDevice);
-            return mainController != null ? new Device(mainController) : null;
+            return mainController != null ? new Device(mainController, _connector) : null;
         }
 
+        /// <summary>
+        /// 获取随机桌面设备
+        /// </summary>
         public async Task<IDevice?> RequestRandomDesktopDevice()
         {
             var devices = await RequestDeviceList();
             var desktopDevices = devices.Where(x => x.DeviceOSType == OperatingSystems.Windows
-                                                                                                || x.DeviceOSType == OperatingSystems.MacOS
-                                                                                                || x.DeviceOSType == OperatingSystems.Linux).ToList();
-            if (desktopDevices.Count == 0) return null;
+                                                  || x.DeviceOSType == OperatingSystems.MacOS
+                                                  || x.DeviceOSType == OperatingSystems.Linux)
+                                      .ToList();
+            
+            if (!desktopDevices.Any())
+                return null;
 
             var random = new Random();
             var randomDevice = desktopDevices[random.Next(desktopDevices.Count)];
-            return new Device(randomDevice);
+            return new Device(randomDevice, _connector);
         }
 
+        /// <summary>
+        /// 获取随机移动设备
+        /// </summary>
         public async Task<IDevice?> RequestRandomMobileDevice()
         {
             var devices = await RequestDeviceList();
             var mobileDevices = devices.Where(x => x.DeviceOSType == OperatingSystems.Android
-                                                                                               || x.DeviceOSType == OperatingSystems.IOS).ToList();
-            if (mobileDevices.Count == 0) return null;
+                                                || x.DeviceOSType == OperatingSystems.IOS)
+                                     .ToList();
             
+            if (!mobileDevices.Any())
+                return null;
+
             var random = new Random();
             var randomDevice = mobileDevices[random.Next(mobileDevices.Count)];
-            return new Device(randomDevice);
+            return new Device(randomDevice, _connector);
         }
 
+        /// <summary>
+        /// 根据过滤器获取设备
+        /// </summary>
         public async Task<IDevice?> RequestDeviceByFilter(Func<DeviceInfo, bool> filter)
         {
             var devices = await RequestDeviceList();
             var matchedDevice = devices.FirstOrDefault(filter);
-            return matchedDevice != null ? new Device(matchedDevice) : null;
+            return matchedDevice != null ? new Device(matchedDevice, _connector) : null;
         }
 
+        /// <summary>
+        /// 获取用户选择的设备
+        /// </summary>
         public async Task<IDevice?> RequestUserSelectedDevice(IEnumerable<DeviceInfo> candidates)
         {
-            var tcs = new TaskCompletionSource<DeviceInfo?>();
-
-            void OnResponse(Request response)
-            {
-                try
+            var response = await _requestBuilder
+                .WithFunction("SelectDevice", candidates)
+                .ExecuteAsync(async response =>
                 {
-                    response.Match(
-                        response.GetContent(content => // 这里返回的是用户选择的设备的 MAC 地址
-                        {
-                            // Parse selected device from response
-                            if (string.IsNullOrEmpty(content))
-                            {
-                                tcs.SetResult(null);
-                                return content;
-                            }
+                    var result = await ResponseHandler.HandleStringResponse(response);
+                    if (string.IsNullOrEmpty(result))
+                        return null;
 
-                            var selectedDevice = candidates.FirstOrDefault(d => 
-                                d.Device.MacAddress.ToString().Equals(content, StringComparison.OrdinalIgnoreCase));
-                            tcs.SetResult(selectedDevice);
-                            return content;
-                        }),
-                        matchCommand: ProcessCommandResponse
-                    );
-                }
-                catch (Exception ex)
-                {
-                    tcs.SetException(ex);
-                }
-            }
+                    return candidates.FirstOrDefault(d =>
+                        d.Device.MacAddress.ToString().Equals(result, StringComparison.OrdinalIgnoreCase));
+                });
 
-            // Send candidates to local device for selection
-            _connector.Request()
-                .UpdateCommand(cmd =>
-                {
-                    cmd.FunctionName = "SelectDevice";
-                    cmd.FunctionArgs = candidates.Select(d => new Parameter { Value = d.ToString() }).ToList(); // todo: 改为传入一个函数用于筛选设备
-                    return cmd;
-                })
-                .UpdateRequest(req =>
-                {
-                    req.Type = RequestTypes.Command;
-                    req.Version = RequestVersions.V1;
-                    req.Target = null; // Send to local device
-                    return req;
-                })
-                .SetSender(OnResponse)
-                .Send();
-
-            var selectedDevice = await tcs.Task;
-            return selectedDevice != null ? new Device(selectedDevice) : null;
+            return response != null ? new Device(response, _connector) : null;
         }
 
+        /// <summary>
+        /// 获取设备列表
+        /// </summary>
         public async Task<IEnumerable<DeviceInfo>> RequestDeviceList()
         {
-            if (_cachedDeviceList != null)
-                return _cachedDeviceList;
-
-            var tcs = new TaskCompletionSource<IEnumerable<DeviceInfo>>();
-
-            void OnResponse(Request response)
+            return await _deviceCache.GetOrAdd("devices", async () =>
             {
-                try
-                {
-                    var devices = HandleDeviceListResponse(response);
-                    _cachedDeviceList = devices;
-                    tcs.SetResult(devices);
-                }
-                catch (Exception ex)
-                {
-                    tcs.SetException(ex);
-                }
-            }
+                var response = await _requestBuilder
+                    .WithFunction("GetDeviceList")
+                    .ExecuteAsync(async response =>
+                    {
+                        var result = await ResponseHandler.HandlePrefixedResponse<List<DeviceInfo>>(
+                            response,
+                            "DeviceList:");
 
-            // Request device list from network
-            _connector.Request()
-                .UpdateCommand(cmd =>
-                {
-                    cmd.FunctionName = "GetDeviceList";
-                    return cmd;
-                })
-                .UpdateRequest(req =>
-                {
-                    req.Type = RequestTypes.Command;
-                    req.Version = RequestVersions.V1;
-                    return req;
-                })
-                .SetSender(OnResponse)
-                .Send();
+                        if (result != null)
+                            UpdateDeviceStates(result);
 
-            return await tcs.Task;
+                        return result ?? new List<DeviceInfo>();
+                    });
+
+                return response;
+            });
         }
 
-        private IEnumerable<DeviceInfo> HandleDeviceListResponse(Request response)
+        private void UpdateDeviceStates(IEnumerable<DeviceInfo> newDevices)
         {
-            var devices = new List<DeviceInfo>();
-            
-            response.Match(
-                response.GetContent(content =>
-                {
-                    // Parse device list from content
-                    // This should be replaced with proper deserialization based on response format
-                    // For now returning empty list as placeholder
-                    return content;
-                }),
-                matchCommand: content =>
-                {
-                    ProcessCommandResponse(content);
-                }
-            );
-
-            return devices;
-        }
-
-        private void ProcessCommandResponse(string content)
-        {
-            if (string.IsNullOrEmpty(content))
+            if (_isDisposed)
                 return;
 
-            try
+            lock (_lockObject)
             {
-                // Handle different command responses based on content
-                if (content.StartsWith("DeviceList:"))
+                var newDevicesDict = newDevices.ToDictionary(d => d.Device.MacAddress.ToString());
+
+                // Find removed devices
+                var removedDevices = _lastKnownDevices.Keys
+                    .Except(newDevicesDict.Keys)
+                    .Select(key => _lastKnownDevices[key])
+                    .ToList();
+
+                // Find added devices
+                var addedDevices = newDevicesDict.Keys
+                    .Except(_lastKnownDevices.Keys)
+                    .Select(key => newDevicesDict[key])
+                    .ToList();
+
+                // Find changed devices
+                var changedDevices = _lastKnownDevices.Keys
+                    .Intersect(newDevicesDict.Keys)
+                    .Where(key => HasDeviceChanged(_lastKnownDevices[key], newDevicesDict[key]))
+                    .Select(key => newDevicesDict[key])
+                    .ToList();
+
+                // Update last known devices
+                _lastKnownDevices = newDevicesDict;
+
+                // Notify listeners
+                var listeners = _listeners.ToList();
+                foreach (var listener in listeners)
                 {
-                    var deviceListJson = content["DeviceList:".Length..];
-                    _cachedDeviceList = JsonSerializer.Deserialize<List<DeviceInfo>>(deviceListJson);
-                }
-                else if (content.StartsWith("Error:"))
-                {
-                    var error = content["Error:".Length..];
-                    throw new InvalidOperationException($"Command error: {error}");
+                    try
+                    {
+                        foreach (var device in removedDevices)
+                            listener.OnDeviceRemoved(device);
+
+                        foreach (var device in addedDevices)
+                            listener.OnDeviceAdded(device);
+
+                        foreach (var device in changedDevices)
+                            listener.OnDeviceStatusChanged(device);
+
+                        listener.OnDeviceListUpdated(newDevices);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log error but continue with other listeners
+                        System.Diagnostics.Debug.WriteLine($"Error in device listener: {ex.Message}");
+                    }
                 }
             }
-            catch (Exception ex)
+        }
+
+        private bool HasDeviceChanged(DeviceInfo oldDevice, DeviceInfo newDevice)
+        {
+            // 检查设备在线状态（基于最后一次发送时间）
+            var oldDeviceOnline = DateTime.UtcNow - oldDevice.SendTime < DeviceOfflineThreshold;
+            var newDeviceOnline = DateTime.UtcNow - newDevice.SendTime < DeviceOfflineThreshold;
+
+            if (oldDeviceOnline != newDeviceOnline)
+                return true;
+
+            // 检查关键属性变化
+            return oldDevice.PluginsCount != newDevice.PluginsCount ||
+                   oldDevice.Device.IPv4 != newDevice.Device.IPv4 ||
+                   oldDevice.Device.IPv6 != newDevice.Device.IPv6 ||
+                   oldDevice.PluginsServerPort != newDevice.PluginsServerPort ||
+                   oldDevice.DevicesServerPort != newDevice.DevicesServerPort ||
+                   oldDevice.IsMainDevice != newDevice.IsMainDevice ||
+                   oldDevice.DeviceOSVersion != newDevice.DeviceOSVersion;
+        }
+
+        public void Dispose()
+        {
+            if (_isDisposed)
+                return;
+
+            _isDisposed = true;
+            _deviceCache.Dispose();
+            lock (_lockObject)
             {
-                throw new InvalidOperationException($"Failed to process command response: {ex.Message}", ex);
+                _listeners.Clear();
+                _lastKnownDevices.Clear();
             }
         }
     }
