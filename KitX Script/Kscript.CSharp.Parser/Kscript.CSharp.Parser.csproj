@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>12</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Kscript.CSharp.Parser</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <StartupObject>Kscript.CSharp.Parser.Examples.Program</StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\KitX Shared\KitX.Shared.CSharp\KitX.Shared.CSharp.csproj" />
+  </ItemGroup>
+
+</Project>
