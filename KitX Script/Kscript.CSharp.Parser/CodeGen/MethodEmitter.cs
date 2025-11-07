@@ -10,6 +10,19 @@ namespace Kscript.CSharp.Parser.CodeGen;
 public static class MethodEmitter
 {
     /// <summary>
+    /// 静态插件管理器实例，用于在生成的程序集中使用
+    /// </summary>
+    private static IPluginManager? _staticPluginManager;
+
+    /// <summary>
+    /// 设置静态插件管理器实例
+    /// </summary>
+    /// <param name="pluginManager">插件管理器实例</param>
+    public static void SetStaticPluginManager(IPluginManager pluginManager)
+    {
+        _staticPluginManager = pluginManager;
+    }
+    /// <summary>
     /// 为插件生成动态程序集
     /// </summary>
     /// <param name="plugins">插件信息列表</param>
@@ -21,7 +34,7 @@ public static class MethodEmitter
         try
         {
             // 创建动态程序集
-            var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
+            var assemblyBuilder = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(
                 new AssemblyName(assemblyName),
                 AssemblyBuilderAccess.Run);
 
@@ -89,10 +102,13 @@ public static class MethodEmitter
 
         var il = constructorBuilder.GetILGenerator();
 
-        if (pluginManager != null)
+        // 优先使用静态插件管理器实例
+        var managerToUse = _staticPluginManager ?? pluginManager;
+
+        if (managerToUse != null)
         {
             // 如果提供了插件管理器实例，直接使用
-            il.Emit(OpCodes.Ldtoken, pluginManager.GetType());
+            il.Emit(OpCodes.Ldtoken, managerToUse.GetType());
             il.Emit(OpCodes.Call, typeof(Type).GetMethod("GetTypeFromHandle")!);
             il.Emit(OpCodes.Call, typeof(Activator).GetMethod("CreateInstance", new[] { typeof(Type) })!);
             il.Emit(OpCodes.Castclass, typeof(IPluginManager));

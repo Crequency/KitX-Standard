@@ -24,6 +24,13 @@ public static class Program
             // 运行高级功能示例
             BasicUsageExample.RunAdvancedExample();
 
+            // 运行实际插件管理器示例
+            Console.WriteLine("\n" + new string('=', 60));
+            RealPluginManagerExample.RunExample();
+
+            Console.WriteLine("\n" + new string('=', 60));
+            RealPluginManagerExample.DashboardIntegrationExample();
+
             Console.WriteLine("\n==================================================");
             Console.WriteLine("✅ 所有示例运行完成!");
         }

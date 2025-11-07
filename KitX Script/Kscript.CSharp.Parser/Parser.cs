@@ -17,12 +17,26 @@ public static class Parser
     private static IPluginManager? _defaultPluginManager;
 
     /// <summary>
+    /// 插件管理器工厂函数
+    /// </summary>
+    private static Func<IPluginManager>? _pluginManagerFactory;
+
+    /// <summary>
     /// 设置默认插件管理器
     /// </summary>
     /// <param name="pluginManager">插件管理器实例</param>
     public static void SetDefaultPluginManager(IPluginManager pluginManager)
     {
         _defaultPluginManager = pluginManager;
+    }
+
+    /// <summary>
+    /// 设置插件管理器工厂函数
+    /// </summary>
+    /// <param name="factory">插件管理器工厂函数</param>
+    public static void SetPluginManagerFactory(Func<IPluginManager> factory)
+    {
+        _pluginManagerFactory = factory;
     }
 
     /// <summary>
@@ -43,7 +57,10 @@ public static class Parser
 
         try
         {
-            var manager = pluginManager ?? _defaultPluginManager ?? new MockPluginManager();
+            var manager = pluginManager ?? _defaultPluginManager ?? _pluginManagerFactory?.Invoke() ?? new MockPluginManager();
+
+            // 设置静态插件管理器实例
+            MethodEmitter.SetStaticPluginManager(manager);
 
             if (useCache)
             {
@@ -146,7 +163,11 @@ public static class Parser
 
         try
         {
-            var manager = pluginManager ?? _defaultPluginManager ?? new MockPluginManager();
+            var manager = pluginManager ?? _defaultPluginManager ?? _pluginManagerFactory?.Invoke() ?? new MockPluginManager();
+
+            // 设置静态插件管理器实例
+            MethodEmitter.SetStaticPluginManager(manager);
+
             return AssemblyCache.ForceRegenerate(plugins, assemblyName, manager);
         }
         catch (Exception ex) when (!(ex is ParserException))

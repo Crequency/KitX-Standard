@@ -96,6 +96,62 @@ dotnet build
 dotnet run
 ```
 
+## 🔌 实际插件管理器集成
+
+### 概述
+
+KitX.CSharp.Parser 现在支持使用实际的插件管理器替换默认的 MockPluginManager，实现与 KitX Dashboard 的真实插件调用集成。
+
+### 集成步骤
+
+1. **设置插件管理器工厂**
+   ```csharp
+   // 在 KitX Dashboard 启动时设置
+   Parser.SetPluginManagerFactory(() => new RealPluginManager(
+       KitX.Dashboard.Network.PluginsNetwork.PluginsServer.Instance,
+       message => Log.Information(message)
+   ));
+   ```
+
+2. **生成插件程序集**
+   ```csharp
+   var assembly = Parser.Generate(plugins, "DashboardPluginAssembly");
+   ```
+
+3. **在脚本中使用**
+   ```csharp
+   // 现在可以直接调用，将通过真实的 KitX Dashboard 插件系统执行
+   var result = SampleCalculator.Add(10, 20);
+   ```
+
+### API 参考
+
+#### 新增方法
+
+| 方法 | 描述 | 参数 |
+|------|------|------|
+| `SetPluginManagerFactory()` | 设置插件管理器工厂函数 | `Func<IPluginManager> factory` |
+
+#### RealPluginManager 构造函数
+
+| 参数 | 类型 | 描述 |
+|------|------|------|
+| `pluginsServer` | `object` | PluginsServer 实例 |
+| `logger` | `Action<string>` | 日志记录器 |
+
+### 使用示例
+
+详细的使用示例请参考：
+- `Examples/RealPluginManagerExample.cs` - 完整的使用示例
+- `Examples/Program.cs` - 演示程序入口
+
+### 注意事项
+
+- ✅ **依赖注入设计**：通过工厂函数模式实现松耦合
+- ✅ **日志统一**：支持外部传入日志记录器
+- ✅ **向后兼容**：仍支持 MockPluginManager 作为默认选项
+- ✅ **实际调用**：通过 KitX Dashboard 的插件系统进行真实调用
+
 ---
 
 ## 📁 项目结构
