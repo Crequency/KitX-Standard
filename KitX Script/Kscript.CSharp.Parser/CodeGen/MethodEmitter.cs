@@ -1,14 +1,37 @@
 using Kscript.CSharp.Parser.Core;
 using Kscript.CSharp.Parser.Exceptions;
 using Kscript.CSharp.Parser.Models;
+using System.Reflection.Emit;
+using System.Runtime.Loader;
+using System.Collections.Concurrent;
 
 namespace Kscript.CSharp.Parser.CodeGen;
+
+/// <summary>
+/// 可收集的程序集加载上下文，支持程序集卸载
+/// </summary>
+public class CollectibleAssemblyLoadContext : AssemblyLoadContext
+{
+    public CollectibleAssemblyLoadContext(string name) : base(name, isCollectible: true)
+    {
+    }
+
+    protected override Assembly Load(AssemblyName assemblyName)
+    {
+        // 让默认上下文处理核心程序集加载
+        return null;
+    }
+}
 
 /// <summary>
 /// IL 方法生成器，负责生成插件调用的静态方法
 /// </summary>
 public static class MethodEmitter
 {
+    /// <summary>
+    /// 程序集加载上下文缓存，用于隔离和卸载程序集
+    /// </summary>
+    private static readonly ConcurrentDictionary<string, CollectibleAssemblyLoadContext> _loadContexts = new();
     /// <summary>
     /// 为插件生成动态程序集
     /// </summary>
@@ -21,12 +44,22 @@ public static class MethodEmitter
     {
         try
         {
-            // 创建动态程序集
-            var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
-                new AssemblyName(assemblyName),
-                AssemblyBuilderAccess.Run);
+            // 如果已存在相同名称的程序集加载上下文，先卸载它
+            if (_loadContexts.TryGetValue(assemblyName, out var existingContext))
+            {
+                UnloadAssemblyContext(assemblyName, existingContext);
+            }
 
-            var moduleBuilder = assemblyBuilder.DefineDynamicModule($"{assemblyName}.dll");
+            // 创建新的可卸载的程序集加载上下文
+            var loadContext = new CollectibleAssemblyLoadContext(assemblyName);
+            _loadContexts.TryAdd(assemblyName, loadContext);
+
+            // 使用PersistedAssemblyBuilder创建可保存的动态程序集
+            var persistedAssemblyBuilder = new PersistedAssemblyBuilder(
+                new AssemblyName(assemblyName),
+                typeof(object).Assembly);
+
+            var moduleBuilder = persistedAssemblyBuilder.DefineDynamicModule($"{assemblyName}.dll");
 
             // 为每个插件生成静态类
             foreach (var plugin in plugins)
@@ -34,11 +67,83 @@ public static class MethodEmitter
                 GeneratePluginClass(moduleBuilder, plugin, pluginManager);
             }
 
-            return assemblyBuilder;
+            // 创建所有类型
+            foreach (var plugin in plugins)
+            {
+                // 确保所有类型都已创建
+                // 类型在GeneratePluginClass中已经创建
+            }
+
+            // 保存到临时文件并重新加载为可引用的程序集
+            var tempPath = Path.Combine(Path.GetTempPath(), $"{assemblyName}_{Guid.NewGuid()}.dll");
+
+            using (var fileStream = File.Create(tempPath))
+            {
+                persistedAssemblyBuilder.Save(fileStream);
+            }
+
+            // 使用自定义加载上下文从文件加载程序集
+            var assembly = loadContext.LoadFromAssemblyPath(tempPath);
+
+            Console.WriteLine($"[MethodEmitter] 使用CollectibleAssemblyLoadContext生成并加载程序集: {assemblyName} -> {tempPath}");
+
+            // 注册临时文件删除（在程序退出时）
+            AppDomain.CurrentDomain.ProcessExit += (s, e) =>
+            {
+                try
+                {
+                    if (File.Exists(tempPath))
+                        File.Delete(tempPath);
+                }
+                catch
+                {
+                    // 忽略删除错误
+                }
+            };
+
+            return assembly;
         }
         catch (Exception ex)
         {
             throw new ParserException($"生成程序集失败: {assemblyName}", ex);
+        }
+    }
+
+    /// <summary>
+    /// 卸载程序集加载上下文
+    /// </summary>
+    /// <param name="assemblyName">程序集名称</param>
+    /// <param name="context">要卸载的加载上下文</param>
+    private static void UnloadAssemblyContext(string assemblyName, CollectibleAssemblyLoadContext context)
+    {
+        try
+        {
+            Console.WriteLine($"[MethodEmitter] 卸载程序集加载上下文: {assemblyName}");
+
+            // 从缓存中移除
+            _loadContexts.TryRemove(assemblyName, out _);
+
+            // 卸载上下文
+            context.Unload();
+
+            // 等待卸载完成
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[MethodEmitter] 卸载程序集加载上下文失败: {assemblyName}, 错误: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 清除所有程序集加载上下文
+    /// </summary>
+    public static void ClearAllAssemblyContexts()
+    {
+        foreach (var kvp in _loadContexts)
+        {
+            UnloadAssemblyContext(kvp.Key, kvp.Value);
         }
     }
 

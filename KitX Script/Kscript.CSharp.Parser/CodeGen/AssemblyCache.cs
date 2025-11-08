@@ -70,6 +70,8 @@ public static class AssemblyCache
     public static void ClearCache()
     {
         _assemblyCache.Clear();
+        // 清除所有程序集加载上下文
+        MethodEmitter.ClearAllAssemblyContexts();
     }
 
     /// <summary>
@@ -111,7 +113,7 @@ public static class AssemblyCache
         // 移除现有缓存
         _assemblyCache.TryRemove(cacheKey, out _);
 
-        // 生成新的程序集
+        // 生成新的程序集（这会自动卸载旧的程序集加载上下文）
         var newAssembly = MethodEmitter.GenerateAssembly(plugins, assemblyName, pluginManager);
 
         // 添加到缓存

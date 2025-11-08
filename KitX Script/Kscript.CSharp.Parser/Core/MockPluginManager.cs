@@ -16,6 +16,7 @@ public class MockPluginManager : IPluginManager
             "SampleCalculator", new Dictionary<string, object>
             {
                 { "Add", (int a, int b) => a + b },
+                { "Multiply", (double x, double y) => x * y },
                 { "Divide", (double numerator, double denominator, int decimals = 2) => Math.Round(numerator / denominator, decimals) }
             }
         },
@@ -23,7 +24,14 @@ public class MockPluginManager : IPluginManager
             "StringToolkit", new Dictionary<string, object>
             {
                 { "Reverse", (string text) => new string(text.Reverse().ToArray()) },
-                { "ToUpper", (string text) => text.ToUpperInvariant() }
+                { "ToUpper", (string text) => text.ToUpperInvariant() },
+                { "Concat", (string str1, string str2) => str1 + str2 }
+            }
+        },
+        {
+            "KitXWF", new Dictionary<string, object>
+            {
+                { "Print", (string message) => Console.WriteLine(message) }
             }
         }
     };
@@ -108,24 +116,43 @@ public class MockPluginManager : IPluginManager
     private object? InvokeMockMethod(PluginCallInfo callInfo, object method)
     {
         // 根据插件和方法名进行简单的模拟计算
-        return (callInfo.PluginName, callInfo.MethodName) switch
+        switch (callInfo.PluginName)
         {
-            ("SampleCalculator", "Add") when callInfo.Parameters.Length >= 2 =>
-                Convert.ToInt32(callInfo.Parameters[0]) + Convert.ToInt32(callInfo.Parameters[1]),
+            case "SampleCalculator":
+                switch (callInfo.MethodName)
+                {
+                    case "Add" when callInfo.Parameters.Length >= 2:
+                        return Convert.ToInt32(callInfo.Parameters[0]) + Convert.ToInt32(callInfo.Parameters[1]);
+                    case "Multiply" when callInfo.Parameters.Length >= 2:
+                        return Convert.ToDouble(callInfo.Parameters[0]) * Convert.ToDouble(callInfo.Parameters[1]);
+                    case "Divide" when callInfo.Parameters.Length >= 2:
+                        return callInfo.Parameters.Length >= 3
+                            ? Math.Round(Convert.ToDouble(callInfo.Parameters[0]) / Convert.ToDouble(callInfo.Parameters[1]), Convert.ToInt32(callInfo.Parameters[2]))
+                            : Math.Round(Convert.ToDouble(callInfo.Parameters[0]) / Convert.ToDouble(callInfo.Parameters[1]), 2);
+                }
+                break;
+            case "KitXWF":
+                switch (callInfo.MethodName)
+                {
+                    case "Print" when callInfo.Parameters.Length >= 1:
+                        Console.WriteLine($"[KitXWF] {callInfo.Parameters[0]?.ToString() ?? ""}");
+                        return null;
+                }
+                break;
+            case "StringToolkit":
+                switch (callInfo.MethodName)
+                {
+                    case "Reverse" when callInfo.Parameters.Length >= 1:
+                        return new string(callInfo.Parameters[0].ToString()?.Reverse().ToArray() ?? Array.Empty<char>());
+                    case "ToUpper" when callInfo.Parameters.Length >= 1:
+                        return callInfo.Parameters[0].ToString()?.ToUpperInvariant() ?? string.Empty;
+                    case "Concat" when callInfo.Parameters.Length >= 2:
+                        return callInfo.Parameters[0].ToString() + callInfo.Parameters[1].ToString();
+                }
+                break;
+        }
 
-            ("SampleCalculator", "Divide") when callInfo.Parameters.Length >= 2 =>
-                callInfo.Parameters.Length >= 3
-                    ? Math.Round(Convert.ToDouble(callInfo.Parameters[0]) / Convert.ToDouble(callInfo.Parameters[1]), Convert.ToInt32(callInfo.Parameters[2]))
-                    : Math.Round(Convert.ToDouble(callInfo.Parameters[0]) / Convert.ToDouble(callInfo.Parameters[1]), 2),
-
-            ("StringToolkit", "Reverse") when callInfo.Parameters.Length >= 1 =>
-                new string(callInfo.Parameters[0].ToString()?.Reverse().ToArray() ?? Array.Empty<char>()),
-
-            ("StringToolkit", "ToUpper") when callInfo.Parameters.Length >= 1 =>
-                callInfo.Parameters[0].ToString()?.ToUpperInvariant() ?? string.Empty,
-
-            _ => $"MockResult_{callInfo.MethodName}"
-        };
+        return $"MockResult_{callInfo.MethodName}";
     }
 
     /// <summary>
