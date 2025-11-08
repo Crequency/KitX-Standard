@@ -18,24 +18,21 @@ public static class RealPluginManagerExample
 
         try
         {
-            // 1. 设置插件管理器工厂函数
-            Console.WriteLine("1. 设置插件管理器工厂函数...");
+            // 1. 设置插件管理器
+            Console.WriteLine("1. 设置插件管理器...");
 
             // 这里应该传入实际的 PluginsServer 实例和日志记录器
             // 由于这是一个示例，我们使用 null 作为占位符
-            Parser.SetPluginManagerFactory(() =>
-            {
-                // 在实际使用中，这里应该传入真实的 PluginsServer 实例和日志记录器
-                // 例如：
-                // var pluginsServer = KitX.Dashboard.Network.PluginsNetwork.PluginsServer.Instance;
-                // var logger = Serilog.Log.Logger;
-                // return new RealPluginManager(pluginsServer, message => logger.Information(message));
+            // 在实际使用中，这里应该传入真实的 PluginsServer 实例和日志记录器
+            // 例如：
+            // var pluginsServer = KitX.Dashboard.Network.PluginsNetwork.PluginsServer.Instance;
+            // var logger = Serilog.Log.Logger;
+            // Parser.SetPluginManager(new RealPluginManager(pluginsServer, message => logger.Information(message)));
 
-                Console.WriteLine("   创建 RealPluginManager 实例...");
-                return null; // 示例中返回 null，实际使用时返回真实实例
-            });
+            Console.WriteLine("   使用 MockPluginManager 进行演示...");
+            Parser.SetPluginManager(new MockPluginManager());
 
-            Console.WriteLine("   ✓ 插件管理器工厂函数已设置");
+            Console.WriteLine("   ✓ 插件管理器已设置");
 
             // 2. 创建示例插件数据
             Console.WriteLine("\n2. 创建示例插件数据...");
@@ -43,17 +40,18 @@ public static class RealPluginManagerExample
             {
                 new PluginInfo
                 {
-                    Name = "TestPlugin",
+                    Name = "SampleCalculator",
                     Version = "1.0.0",
                     Functions = new List<Function>
                     {
                         new Function
                         {
-                            Name = "TestMethod",
-                            ReturnValueType = "string",
+                            Name = "Add",
+                            ReturnValueType = "int",
                             Parameters = new List<Parameter>
                             {
-                                new Parameter { Name = "input", Type = "string", IsOptional = false }
+                                new Parameter { Name = "a", Type = "int", IsOptional = false },
+                                new Parameter { Name = "b", Type = "int", IsOptional = false }
                             }
                         }
                     }
@@ -123,7 +121,7 @@ public static class RealPluginManagerExample
         Console.WriteLine("\n3. 在脚本中使用生成的 API：");
         Console.WriteLine("```csharp");
         Console.WriteLine("// 现在可以在脚本中直接调用");
-        Console.WriteLine("var result = TestPlugin.TestMethod(\"Hello World\");");
+        Console.WriteLine("var result = SampleCalculator.Add(10, 20);");
         Console.WriteLine("```");
 
         Console.WriteLine("\n这样，脚本中的插件调用将通过真实的 KitX Dashboard 插件系统执行！");

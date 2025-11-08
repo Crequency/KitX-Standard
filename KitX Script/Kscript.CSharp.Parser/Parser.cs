@@ -12,31 +12,52 @@ namespace Kscript.CSharp.Parser;
 public static class Parser
 {
     /// <summary>
-    /// 默认插件管理器
+    /// 插件管理器实例
     /// </summary>
-    private static IPluginManager? _defaultPluginManager;
+    private static IPluginManager? _pluginManager;
 
     /// <summary>
-    /// 插件管理器工厂函数
+    /// 获取Parser初始化状态
     /// </summary>
-    private static Func<IPluginManager>? _pluginManagerFactory;
+    public static bool IsInitialized => _pluginManager != null;
 
     /// <summary>
-    /// 设置默认插件管理器
+    /// 设置插件管理器
     /// </summary>
     /// <param name="pluginManager">插件管理器实例</param>
-    public static void SetDefaultPluginManager(IPluginManager pluginManager)
+    public static void SetPluginManager(IPluginManager pluginManager)
     {
-        _defaultPluginManager = pluginManager;
+        _pluginManager = pluginManager ?? throw new ArgumentNullException(nameof(pluginManager));
     }
 
     /// <summary>
-    /// 设置插件管理器工厂函数
+    /// 确保Parser已正确初始化
     /// </summary>
-    /// <param name="factory">插件管理器工厂函数</param>
-    public static void SetPluginManagerFactory(Func<IPluginManager> factory)
+    /// <exception cref="InvalidOperationException">当Parser未初始化时抛出</exception>
+    private static void EnsureInitialized()
     {
-        _pluginManagerFactory = factory;
+        if (_pluginManager == null)
+        {
+            throw new InvalidOperationException("Parser 未初始化。请先调用 SetPluginManager() 设置插件管理器。");
+        }
+    }
+
+    /// <summary>
+    /// 确保所需插件已加载
+    /// </summary>
+    /// <param name="plugins">插件信息列表</param>
+    /// <exception cref="InvalidOperationException">当所需插件未加载时抛出</exception>
+    private static void EnsurePluginsLoaded(List<PluginInfo> plugins)
+    {
+        foreach (var plugin in plugins)
+        {
+            if (!_pluginManager!.IsPluginExists(plugin.Name))
+            {
+                // TODO: 实现插件动态加载逻辑
+                // 目前先抛出异常，待后续实现插件加载功能
+                throw new InvalidOperationException($"所需插件未加载: {plugin.Name}。请确保插件已正确安装并启动。");
+            }
+        }
     }
 
     /// <summary>
@@ -44,36 +65,32 @@ public static class Parser
     /// </summary>
     /// <param name="plugins">插件信息列表</param>
     /// <param name="assemblyName">程序集名称</param>
-    /// <param name="pluginManager">插件管理器实例（可选，默认使用 MockPluginManager）</param>
     /// <param name="useCache">是否使用缓存</param>
     /// <returns>生成的动态程序集</returns>
-    public static Assembly Generate(List<PluginInfo> plugins, string assemblyName = "DynamicPluginAssembly",
-        IPluginManager? pluginManager = null, bool useCache = true)
+    public static Assembly Generate(List<PluginInfo> plugins, string assemblyName = "DynamicPluginAssembly", bool useCache = true)
     {
         if (plugins == null || plugins.Count == 0)
         {
             throw new ArgumentException("插件列表不能为空", nameof(plugins));
         }
 
+        EnsureInitialized();
+        EnsurePluginsLoaded(plugins);
+
         try
         {
-            var manager = pluginManager ?? _defaultPluginManager ?? _pluginManagerFactory?.Invoke() ?? new MockPluginManager();
-
-            // 设置静态插件管理器实例
-            MethodEmitter.SetStaticPluginManager(manager);
-
             if (useCache)
             {
-                return AssemblyCache.GetOrCreateAssembly(plugins, assemblyName, manager);
+                return AssemblyCache.GetOrCreateAssembly(plugins, assemblyName, _pluginManager!);
             }
             else
             {
-                return MethodEmitter.GenerateAssembly(plugins, assemblyName, manager);
+                return AssemblyCache.ForceRegenerate(plugins, _pluginManager!, assemblyName);
             }
         }
         catch (Exception ex) when (!(ex is ParserException))
         {
-            throw ParserException.AssemblyGenerationError(assemblyName, ex);
+            throw new ParserException($"生成程序集失败: {assemblyName}", ex);
         }
     }
 
@@ -82,11 +99,9 @@ public static class Parser
     /// </summary>
     /// <param name="jsonString">插件清单 JSON 字符串</param>
     /// <param name="assemblyName">程序集名称</param>
-    /// <param name="pluginManager">插件管理器实例</param>
     /// <param name="useCache">是否使用缓存</param>
     /// <returns>生成的动态程序集</returns>
-    public static Assembly GenerateFromJson(string jsonString, string assemblyName = "DynamicPluginAssembly",
-        IPluginManager? pluginManager = null, bool useCache = true)
+    public static Assembly GenerateFromJson(string jsonString, string assemblyName = "DynamicPluginAssembly", bool useCache = true)
     {
         if (string.IsNullOrWhiteSpace(jsonString))
         {
@@ -106,7 +121,7 @@ public static class Parser
                 throw new ParserException("JSON 反序列化失败，结果为 null");
             }
 
-            return Generate(plugins, assemblyName, pluginManager, useCache);
+            return Generate(plugins, assemblyName, useCache);
         }
         catch (JsonException ex)
         {
@@ -119,11 +134,9 @@ public static class Parser
     /// </summary>
     /// <param name="jsonFilePath">JSON 文件路径</param>
     /// <param name="assemblyName">程序集名称</param>
-    /// <param name="pluginManager">插件管理器实例</param>
     /// <param name="useCache">是否使用缓存</param>
     /// <returns>生成的动态程序集</returns>
-    public static async Task<Assembly> GenerateFromFileAsync(string jsonFilePath, string assemblyName = "DynamicPluginAssembly",
-        IPluginManager? pluginManager = null, bool useCache = true)
+    public static async Task<Assembly> GenerateFromFileAsync(string jsonFilePath, string assemblyName = "DynamicPluginAssembly", bool useCache = true)
     {
         if (string.IsNullOrWhiteSpace(jsonFilePath))
         {
@@ -138,7 +151,7 @@ public static class Parser
         try
         {
             var jsonString = await File.ReadAllTextAsync(jsonFilePath);
-            return GenerateFromJson(jsonString, assemblyName, pluginManager, useCache);
+            return GenerateFromJson(jsonString, assemblyName, useCache);
         }
         catch (Exception ex) when (!(ex is ParserException))
         {
@@ -146,45 +159,6 @@ public static class Parser
         }
     }
 
-    /// <summary>
-    /// 强制重新生成程序集（绕过缓存）
-    /// </summary>
-    /// <param name="plugins">插件信息列表</param>
-    /// <param name="assemblyName">程序集名称</param>
-    /// <param name="pluginManager">插件管理器实例</param>
-    /// <returns>新生成的动态程序集</returns>
-    public static Assembly Regenerate(List<PluginInfo> plugins, string assemblyName = "DynamicPluginAssembly",
-        IPluginManager? pluginManager = null)
-    {
-        if (plugins == null || plugins.Count == 0)
-        {
-            throw new ArgumentException("插件列表不能为空", nameof(plugins));
-        }
-
-        try
-        {
-            var manager = pluginManager ?? _defaultPluginManager ?? _pluginManagerFactory?.Invoke() ?? new MockPluginManager();
-
-            // 设置静态插件管理器实例
-            MethodEmitter.SetStaticPluginManager(manager);
-
-            return AssemblyCache.ForceRegenerate(plugins, assemblyName, manager);
-        }
-        catch (Exception ex) when (!(ex is ParserException))
-        {
-            throw ParserException.AssemblyGenerationError(assemblyName, ex);
-        }
-    }
-
-    /// <summary>
-    /// 注册自定义类型映射
-    /// </summary>
-    /// <param name="typeName">类型名字符串</param>
-    /// <param name="type">对应的 Type 对象</param>
-    public static void RegisterCustomType(string typeName, Type type)
-    {
-        TypeMapper.RegisterCustomType(typeName, type);
-    }
 
     /// <summary>
     /// 清除所有缓存

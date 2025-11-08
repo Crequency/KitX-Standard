@@ -18,6 +18,14 @@ public static class BasicUsageExample
 
         try
         {
+            // 0. 初始化插件管理器
+            Console.WriteLine("0. 初始化插件管理器...");
+            if (!Parser.IsInitialized)
+            {
+                Parser.SetPluginManager(new MockPluginManager());
+                Console.WriteLine("   ✓ 已设置 MockPluginManager");
+            }
+
             // 1. 从现有的 example.json 文件加载插件清单
             Console.WriteLine("1. 加载插件清单...");
             var exampleJsonPath = Path.Combine(".", "example.json");
@@ -59,8 +67,27 @@ public static class BasicUsageExample
 
             // 5. 演示缓存效果
             Console.WriteLine("\n5. 测试缓存效果...");
+
+            // 5.1 先检查是否存在缓存
+            var plugins = JsonSerializer.Deserialize<List<PluginInfo>>(await File.ReadAllTextAsync(exampleJsonPath), new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                AllowTrailingCommas = true
+            });
+            var hasCacheBefore = Parser.HasCache(plugins!, "ExamplePluginAssembly");
+            Console.WriteLine($"   生成前检查缓存存在: {hasCacheBefore}");
+
+            // 5.2 第二次生成（应该使用缓存）
             var assembly2 = await Parser.GenerateFromFileAsync(exampleJsonPath, "ExamplePluginAssembly");
             Console.WriteLine($"   第二次生成是否使用缓存: {assembly == assembly2}");
+
+            // 5.3 强制重新生成（应该绕过缓存）
+            var assembly3 = Parser.Generate(plugins!, "ExamplePluginAssembly", useCache: false);
+            Console.WriteLine($"   强制重新生成是否使用新程序集: {assembly3 != assembly2}");
+
+            // 5.4 检查强制重新生成后的缓存状态
+            var hasCacheAfterRegenerate = Parser.HasCache(plugins!, "ExamplePluginAssembly");
+            Console.WriteLine($"   重新生成后缓存存在: {hasCacheAfterRegenerate}");
 
         }
         catch (Exception ex)
@@ -75,6 +102,12 @@ public static class BasicUsageExample
     /// </summary>
     private static void RunWithBuiltInData()
     {
+        // 确保插件管理器已初始化
+        if (!Parser.IsInitialized)
+        {
+            Parser.SetPluginManager(new MockPluginManager());
+        }
+
         // 创建示例插件数据
         var plugins = new List<PluginInfo>
         {
@@ -211,20 +244,15 @@ public static class BasicUsageExample
 
         try
         {
-            // 1. 注册自定义类型
-            Console.WriteLine("1. 注册自定义类型映射...");
-            Parser.RegisterCustomType("CustomType", typeof(DateTime));
-            Console.WriteLine("   ✓ 已注册 CustomType -> DateTime");
-
-            // 2. 清除缓存
-            Console.WriteLine("\n2. 清除所有缓存...");
+            // 1. 清除缓存
+            Console.WriteLine("1. 清除所有缓存...");
             Parser.ClearCache();
             Console.WriteLine("   ✓ 缓存已清除");
 
-            // 3. 设置自定义插件管理器
-            Console.WriteLine("\n3. 设置自定义插件管理器...");
-            Parser.SetDefaultPluginManager(new MockPluginManager());
-            Console.WriteLine("   ✓ 已设置默认插件管理器");
+            // 2. 重新设置插件管理器
+            Console.WriteLine("\n2. 重新设置插件管理器...");
+            Parser.SetPluginManager(new MockPluginManager());
+            Console.WriteLine("   ✓ 已重新设置插件管理器");
 
         }
         catch (Exception ex)

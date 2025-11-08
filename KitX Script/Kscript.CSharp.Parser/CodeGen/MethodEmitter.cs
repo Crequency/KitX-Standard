@@ -10,31 +10,19 @@ namespace Kscript.CSharp.Parser.CodeGen;
 public static class MethodEmitter
 {
     /// <summary>
-    /// 静态插件管理器实例，用于在生成的程序集中使用
-    /// </summary>
-    private static IPluginManager? _staticPluginManager;
-
-    /// <summary>
-    /// 设置静态插件管理器实例
-    /// </summary>
-    /// <param name="pluginManager">插件管理器实例</param>
-    public static void SetStaticPluginManager(IPluginManager pluginManager)
-    {
-        _staticPluginManager = pluginManager;
-    }
-    /// <summary>
     /// 为插件生成动态程序集
     /// </summary>
     /// <param name="plugins">插件信息列表</param>
     /// <param name="assemblyName">程序集名称</param>
     /// <param name="pluginManager">插件管理器实例</param>
     /// <returns>生成的动态程序集</returns>
-    public static Assembly GenerateAssembly(List<PluginInfo> plugins, string assemblyName = "DynamicPluginAssembly", IPluginManager? pluginManager = null)
+    public static Assembly GenerateAssembly(List<PluginInfo> plugins,
+            string assemblyName, IPluginManager pluginManager)
     {
         try
         {
             // 创建动态程序集
-            var assemblyBuilder = System.Reflection.Emit.AssemblyBuilder.DefineDynamicAssembly(
+            var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
                 new AssemblyName(assemblyName),
                 AssemblyBuilderAccess.Run);
 
@@ -50,14 +38,14 @@ public static class MethodEmitter
         }
         catch (Exception ex)
         {
-            throw ParserException.AssemblyGenerationError(assemblyName, ex);
+            throw new ParserException($"生成程序集失败: {assemblyName}", ex);
         }
     }
 
     /// <summary>
     /// 为单个插件生成静态类
     /// </summary>
-    private static void GeneratePluginClass(ModuleBuilder moduleBuilder, PluginInfo plugin, IPluginManager? pluginManager)
+    private static void GeneratePluginClass(ModuleBuilder moduleBuilder, PluginInfo plugin, IPluginManager pluginManager)
     {
         try
         {
@@ -86,14 +74,14 @@ public static class MethodEmitter
         }
         catch (Exception ex)
         {
-            throw ParserException.ILGenerationError($"{plugin.Name} 类", ex);
+            throw new ParserException($"生成IL代码失败: {plugin.Name} 类", ex);
         }
     }
 
     /// <summary>
     /// 生成静态构造函数
     /// </summary>
-    private static void GenerateStaticConstructor(TypeBuilder typeBuilder, FieldBuilder pluginManagerField, IPluginManager? pluginManager)
+    private static void GenerateStaticConstructor(TypeBuilder typeBuilder, FieldBuilder pluginManagerField, IPluginManager pluginManager)
     {
         var constructorBuilder = typeBuilder.DefineConstructor(
             MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
@@ -102,22 +90,11 @@ public static class MethodEmitter
 
         var il = constructorBuilder.GetILGenerator();
 
-        // 优先使用静态插件管理器实例
-        var managerToUse = _staticPluginManager ?? pluginManager;
-
-        if (managerToUse != null)
-        {
-            // 如果提供了插件管理器实例，直接使用
-            il.Emit(OpCodes.Ldtoken, managerToUse.GetType());
-            il.Emit(OpCodes.Call, typeof(Type).GetMethod("GetTypeFromHandle")!);
-            il.Emit(OpCodes.Call, typeof(Activator).GetMethod("CreateInstance", new[] { typeof(Type) })!);
-            il.Emit(OpCodes.Castclass, typeof(IPluginManager));
-        }
-        else
-        {
-            // 使用默认的 MockPluginManager
-            il.Emit(OpCodes.Newobj, typeof(MockPluginManager).GetConstructor(Type.EmptyTypes)!);
-        }
+        // 使用提供的插件管理器实例
+        il.Emit(OpCodes.Ldtoken, pluginManager.GetType());
+        il.Emit(OpCodes.Call, typeof(Type).GetMethod("GetTypeFromHandle")!);
+        il.Emit(OpCodes.Call, typeof(Activator).GetMethod("CreateInstance", new[] { typeof(Type) })!);
+        il.Emit(OpCodes.Castclass, typeof(IPluginManager));
 
         il.Emit(OpCodes.Stsfld, pluginManagerField);
         il.Emit(OpCodes.Ret);
@@ -167,7 +144,7 @@ public static class MethodEmitter
         }
         catch (Exception ex)
         {
-            throw ParserException.ILGenerationError($"{pluginName}.{function.Name}", ex);
+            throw new ParserException($"生成IL代码失败: {pluginName}.{function.Name}", ex);
         }
     }
 
