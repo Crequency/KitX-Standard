@@ -25,7 +25,7 @@ public class ScriptExecutor : IDisposable
     public ScriptExecutor()
     {
         _scriptOptions = ScriptOptions.Default
-            .WithImports("System", "System.Math", "System.Collections.Generic", "System.Console", "System.Linq")
+            .WithImports("System", "System.Math", "System.Collections.Generic", "System.Linq")
             .WithEmitDebugInformation(true);
     }
 
@@ -144,7 +144,6 @@ public class ScriptExecutor : IDisposable
             // 更新脚本选项，包含所有引用
             var options = ScriptOptions.Default
                 .WithReferences(_referencedAssemblies)
-                .WithImports(_usings.Concat(new[] { "System.Console" }))
                 .WithEmitDebugInformation(true);
 
             var csharpScript = CSharpScript.Create(script, options);
