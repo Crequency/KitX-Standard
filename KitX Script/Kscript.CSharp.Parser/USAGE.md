@@ -11,98 +11,75 @@ KitX.CSharp.Parser 是 KitX 工作流子系统的核心组件，它能够将插�
 ```csharp
 using Kscript.CSharp.Parser;
 
-// 1. 从 JSON 字符串生成程序集
+// 1. 设置插件管理器（必须）
+Parser.SetPluginManager(new MockPluginManager());
+
+// 2. 从 JSON 字符串生成程序集
 var jsonString = File.ReadAllText("plugins.json");
 var assembly = Parser.GenerateFromJson(jsonString);
 
-// 2. 从文件生成程序集
+// 3. 从文件生成程序集
 var assembly = await Parser.GenerateFromFileAsync("plugins.json");
 
-// 3. 从插件信息列表生成程序集
+// 4. 从插件信息列表生成程序集
 var plugins = new List<PluginInfo> { /* ... */ };
 var assembly = Parser.Generate(plugins);
+
+// 5. 脚本中直接调用生成的方法
+int sum = SampleCalculator.Add(10, 20);
+string reversed = StringToolkit.Reverse("Hello");
 ```
 
-### 动态调用生成的方法
+### 运行演示
 
-```csharp
-// 获取生成的插件类型
-var pluginTypes = Parser.GetPluginTypes(assembly);
+```bash
+# 构建项目
+dotnet build
 
-foreach (var type in pluginTypes)
-{
-    var methods = Parser.GetPluginMethods(type);
-    foreach (var method in methods)
-    {
-        // 动态调用方法
-        var result = method.Invoke(null, new object[] { /* 参数 */ });
-        Console.WriteLine($"结果: {result}");
-    }
-}
+# 运行演示程序
+dotnet run
 ```
 
 ## 🔧 API 参考
 
 ### Parser 静态类
 
-主入口类，提供所有核心功能。
-
 #### 生成方法
 
 | 方法 | 描述 | 参数 |
 |------|------|------|
-| `Generate()` | 从插件信息列表生成程序集 | `plugins`, `assemblyName`, `pluginManager`, `useCache` |
-| `GenerateFromJson()` | 从 JSON 字符串生成程序集 | `jsonString`, `assemblyName`, `pluginManager`, `useCache` |
-| `GenerateFromFileAsync()` | 从 JSON 文件异步生成程序集 | `jsonFilePath`, `assemblyName`, `pluginManager`, `useCache` |
-| `Regenerate()` | 强制重新生成程序集（绕过缓存） | `plugins`, `assemblyName`, `pluginManager` |
+| `Generate()` | 从插件信息列表生成程序集 | `plugins`, `assemblyName`, `useCache` |
+| `GenerateFromJson()` | 从 JSON 字符串生成程序集 | `jsonString`, `assemblyName`, `useCache` |
+| `GenerateFromFileAsync()` | 从 JSON 文件异步生成程序集 | `jsonFilePath`, `assemblyName`, `useCache` |
 
 #### 配置方法
 
 | 方法 | 描述 |
 |------|------|
-| `SetDefaultPluginManager()` | 设置默认插件管理器 |
-| `RegisterCustomType()` | 注册自定义类型映射 |
+| `SetPluginManager()` | 设置插件管理器实例 | `IPluginManager pluginManager` |
 | `ClearCache()` | 清除所有缓存 |
+| `GetCacheStatistics()` | 获取缓存统计信息 |
 
 #### 分析方法
 
 | 方法 | 描述 |
 |------|------|
-| `GetPluginTypes()` | 获取程序集中的插件类型 |
-| `GetPluginMethods()` | 获取插件类型的方法信息 |
-| `GetCacheStatistics()` | 获取缓存统计信息 |
+| `GetPluginTypes()` | 获取程序集中的所有插件类型 |
+| `GetPluginMethods()` | 获取插件类型的所有方法信息 |
 | `HasCache()` | 检查是否存在缓存 |
 
-### 类型映射系统
+## 📊 类型映射系统
 
-#### 支持的基础类型
+### 支持的基础类型
 
-| JSON 字符串 | CLR 类型 |
-|-------------|----------|
-| `"void"` | `System.Void` |
-| `"bool"` | `System.Boolean` |
-| `"int"` | `System.Int32` |
-| `"double"` | `System.Double` |
-| `"string"` | `System.String` |
-| `"object"` | `System.Object` |
-
-#### 泛型类型支持
-
-```csharp
-// 支持的泛型类型
-"List<int>"           → List<int>
-"Dictionary<string,int>" → Dictionary<string, int>
-"Nullable<int>"       → int?
-"Array<string>"       → string[]
-```
-
-#### 自定义类型映射
-
-```csharp
-// 注册自定义类型
-Parser.RegisterCustomType("DateTime", typeof(DateTime));
-Parser.RegisterCustomType("MyCustomType", typeof(MyClass));
-```
+| JSON 字符串 | CLR 类型 | 示例 |
+|---|---|---|
+| `"void"` | `System.Void` | 无返回值 |
+| `"bool"` | `System.Boolean` | 布尔参数 |
+| `"int"` | `System.Int32` | 整数参数 |
+| `"double"` | `System.Double` | 浮点数参数 |
+| `"string"` | `System.String` | 字符串参数 |
+| `"object"` | `System.Object` | 对象参数 |
 
 ## 🏗️ 架构设计
 
@@ -178,7 +155,33 @@ Parser.RegisterCustomType("Guid", typeof(Guid));
 // 3. 合理使用强制重新生成
 if (pluginChanged)
 {
-    assembly = Parser.Regenerate(plugins);
+    assembly = Parser.Generate(plugins, useCache: false);
+}
+```
+
+## 🚨 错误处理
+
+### 异常类型
+
+- `ParserException` - 解析器相关异常
+- `ArgumentException` - 参数错误
+- `FileNotFoundException` - 文件不存在
+- `InvalidOperationException` - 初始化状态错误
+
+### 异常处理示例
+
+```csharp
+try
+{
+    var assembly = Parser.GenerateFromJson(jsonString);
+}
+catch (ParserException ex)
+{
+    Console.WriteLine($"解析失败: {ex.Message}");
+}
+catch (JsonException ex)
+{
+    Console.WriteLine($"JSON 格式错误: {ex.Message}");
 }
 ```
 
@@ -202,31 +205,6 @@ var stats = Parser.GetCacheStatistics();
 Console.WriteLine($"缓存统计: {stats.CachedAssemblyCount} 个程序集");
 ```
 
-## 🚨 错误处理
-
-### 异常类型
-
-- `ParserException` - 解析器相关异常
-- `ArgumentException` - 参数错误
-- `FileNotFoundException` - 文件不存在
-
-### 异常处理示例
-
-```csharp
-try
-{
-    var assembly = Parser.GenerateFromJson(jsonString);
-}
-catch (ParserException ex)
-{
-    Console.WriteLine($"解析失败: {ex.Message}");
-}
-catch (JsonException ex)
-{
-    Console.WriteLine($"JSON 格式错误: {ex.Message}");
-}
-```
-
 ## 🔌 扩展点
 
 ### 自定义插件管理器
@@ -244,10 +222,10 @@ public class CustomPluginManager : IPluginManager
 }
 
 // 设置自定义管理器
-Parser.SetDefaultPluginManager(new CustomPluginManager());
+Parser.SetPluginManager(new CustomPluginManager());
 ```
 
-### 自定义类型映射
+### 自定义类型映射（已移除，未来可能会用更好的方案重新添加回来，取决于上游协议）
 
 ```csharp
 // 扩展类型映射
@@ -269,7 +247,7 @@ TypeMapper.RegisterCustomType("Color", typeof(System.Drawing.Color));
 
 ```csharp
 // 在脚本中使用生成的API
-var script = @"
+var Script = @"
     int result = SampleCalculator.Add(10, 20);
     string reversed = StringToolkit.Reverse(""Hello"");
     return result;
@@ -277,16 +255,17 @@ var script = @"
 
 // 通过脚本引擎执行
 var assembly = Parser.Generate(plugins);
-var scriptResult = ExecuteScript(script, assembly);
+var ScriptResult = ExecuteScript(Script, assembly);
 ```
 
 ## 📚 更多示例
 
 完整的使用示例请参考：
+
 - `Examples/BasicUsageExample.cs` - 基础功能演示
 - `Examples/Program.cs` - 控制台演示程序
+- `RealPluginManagerExample.cs` - "真实"插件管理器示例
 
-## 🔗 相关项目
+## 🎯 总结
 
-- **KitX.Shared.CSharp** - 共享数据模型
-- **KitX 主项目** - 完整的插件生态系统
+KitX.CSharp.Parser 提供了一个简洁、高效、易维护的解决方案，用于将插件清单转换为可直接调用的 C# API。通过简化的设计和完善的错误处理，确保了在生产环境中的稳定性和可靠性。
