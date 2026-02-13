@@ -13,7 +13,7 @@ namespace Kscript.CSharp.Parser.Core;
 /// </summary>
 public class RealPluginManager : IPluginManager
 {
-    private readonly object _pluginsServer;
+    private readonly IPluginServiceProvider _serviceProvider;
     private readonly Action<string> _infoLogger;
     private readonly Action<string> _errorLogger;
 
@@ -30,16 +30,24 @@ public class RealPluginManager : IPluginManager
     /// <summary>
     /// 构造函数
     /// </summary>
-    /// <param name="pluginsServer">PluginsServer 实例</param>
+    /// <param name="serviceProvider">插件服务提供者实例</param>
     /// <param name="infoLogger">信息日志记录器</param>
     /// <param name="errorLogger">错误日志记录器</param>
-    public RealPluginManager(object pluginsServer, Action<string>? infoLogger = null, Action<string>? errorLogger = null)
+    public RealPluginManager(
+        IPluginServiceProvider serviceProvider,
+        Action<string>? infoLogger = null,
+        Action<string>? errorLogger = null)
     {
-        _pluginsServer = pluginsServer ?? throw new ArgumentNullException(nameof(pluginsServer));
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _infoLogger = infoLogger ?? (message => Console.WriteLine(message));
         _errorLogger = errorLogger ?? (message => Console.WriteLine(message));
 
-        _infoLogger("[WorkflowScriptService] 正在初始化 RealPluginManager...");
+        _infoLogger("[RealPluginManager] 正在初始化 RealPluginManager...");
+
+        // 订阅插件响应事件
+        _serviceProvider.SubscribeToResponses(HandlePluginResponse);
+
+        _infoLogger("[RealPluginManager] RealPluginManager 初始化完成");
     }
 
     /// <summary>
@@ -52,7 +60,7 @@ public class RealPluginManager : IPluginManager
             _infoLogger($"[RealPluginManager] 开始调用插件方法: {callInfo}");
 
             // 查找插件信息
-            var pluginInfo = FindPluginInfo(callInfo.PluginName);
+            var pluginInfo = _serviceProvider.FindPlugin(callInfo.PluginName);
             if (pluginInfo == null)
             {
                 _infoLogger($"[RealPluginManager] 未找到插件: {callInfo.PluginName}");
@@ -60,7 +68,7 @@ public class RealPluginManager : IPluginManager
             }
 
             // 查找插件连接器
-            var connector = FindPluginConnector(pluginInfo);
+            var connector = _serviceProvider.FindConnector(pluginInfo);
             if (connector == null)
             {
                 _infoLogger($"[RealPluginManager] 插件 {callInfo.PluginName} 未连接");
@@ -95,7 +103,7 @@ public class RealPluginManager : IPluginManager
     {
         try
         {
-            var pluginInfo = FindPluginInfo(pluginName);
+            var pluginInfo = _serviceProvider.FindPlugin(pluginName);
             var exists = pluginInfo != null;
 
             _infoLogger($"[RealPluginManager] 检查插件 '{pluginName}' 是否存在: {exists}");
@@ -115,7 +123,7 @@ public class RealPluginManager : IPluginManager
     {
         try
         {
-            var pluginInfo = FindPluginInfo(pluginName);
+            var pluginInfo = _serviceProvider.FindPlugin(pluginName);
             var exists = pluginInfo?.Functions.Any(f => f.Name == methodName) ?? false;
 
             _infoLogger($"[RealPluginManager] 检查方法 '{pluginName}.{methodName}' 是否存在: {exists}");
@@ -129,72 +137,6 @@ public class RealPluginManager : IPluginManager
     }
 
     /// <summary>
-    /// 查找插件信息
-    /// </summary>
-    private PluginInfo? FindPluginInfo(string pluginName)
-    {
-        try
-        {
-            // 通过传入的 PluginsServer 实例查找插件信息
-            var pluginsServerType = _pluginsServer.GetType();
-            var pluginConnectorsProperty = pluginsServerType.GetProperty("PluginConnectors");
-
-            if (pluginConnectorsProperty != null)
-            {
-                var pluginConnectors = pluginConnectorsProperty.GetValue(_pluginsServer) as System.Collections.IList;
-                if (pluginConnectors != null)
-                {
-                    foreach (var connector in pluginConnectors)
-                    {
-                        if (connector != null)
-                        {
-                            var connectorType = connector.GetType();
-                            var pluginInfoProperty = connectorType.GetProperty("PluginInfo");
-                            if (pluginInfoProperty != null)
-                            {
-                                var pluginInfo = pluginInfoProperty.GetValue(connector) as PluginInfo;
-                                if (pluginInfo != null && pluginInfo.Name == pluginName)
-                                {
-                                    return pluginInfo;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _errorLogger($"[RealPluginManager] 查找插件信息失败: {pluginName} - 异常: {ex.Message}");
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    /// 查找插件连接器
-    /// </summary>
-    private object? FindPluginConnector(PluginInfo pluginInfo)
-    {
-        try
-        {
-            var pluginsServerType = _pluginsServer.GetType();
-            var findConnectorMethod = pluginsServerType.GetMethod("FindConnector", new[] { typeof(PluginInfo) });
-
-            if (findConnectorMethod != null)
-            {
-                return findConnectorMethod.Invoke(_pluginsServer, new object[] { pluginInfo });
-            }
-        }
-        catch (Exception ex)
-        {
-            _errorLogger($"[RealPluginManager] 查找插件连接器失败: {pluginInfo.Name} - 异常: {ex.Message}");
-        }
-
-        return null;
-    }
-
-    /// <summary>
     /// 发送插件请求
     /// </summary>
     private async Task<T> SendPluginRequest<T>(object connector, PluginCallInfo callInfo)
@@ -205,7 +147,7 @@ public class RealPluginManager : IPluginManager
             var connectorInstance = new Connector()
                 .SetSerializer(x => JsonSerializer.Serialize(x, _serializerOptions))
                 .SetSender(request => {
-                    SendRequestToConnector(connector, request).ConfigureAwait(false);
+                    _serviceProvider.SendRequestAsync(connector, request).ConfigureAwait(false);
                 });
 
             // 构建参数列表
@@ -219,6 +161,7 @@ public class RealPluginManager : IPluginManager
                 {
                     Name = $"param{i}",
                     Type = paramType.Name,
+                    // TODO: 等待KitX数据传输标准制定完成后，替换为标准序列化方法
                     Value = paramValue?.ToString() ?? string.Empty,
                     IsOptional = false
                 });
@@ -292,30 +235,6 @@ public class RealPluginManager : IPluginManager
         {
             _errorLogger($"[RealPluginManager] 发送插件请求失败: {callInfo.PluginName}.{callInfo.MethodName} - 异常: {ex.Message}");
             return GetDefaultResult<T>();
-        }
-    }
-
-    /// <summary>
-    /// 向连接器发送请求
-    /// </summary>
-    private async Task SendRequestToConnector(object connector, Request request)
-    {
-        try
-        {
-            var connectorType = connector.GetType();
-            var requestMethod = connectorType.GetMethod("Request", new[] { typeof(Request) });
-            if (requestMethod != null)
-            {
-                var result = requestMethod.Invoke(connector, new object[] { request });
-                if (result is Task task)
-                {
-                    await task;
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _errorLogger($"[RealPluginManager] 向连接器发送请求失败 - 异常: {ex.Message}");
         }
     }
 
