@@ -321,6 +321,11 @@ public interface ISecurityConfig
 public interface IPluginInstallation
 {
     /// <summary>
+    /// Gets the unique identifier for this plugin installation
+    /// </summary>
+    Guid Id { get; }
+
+    /// <summary>
     /// Gets the installation path
     /// </summary>
     string? InstallPath { get; }
