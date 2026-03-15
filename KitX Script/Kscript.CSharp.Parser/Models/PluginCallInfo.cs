@@ -1,3 +1,5 @@
+using KitX.Shared.CSharp.Plugin;
+
 namespace Kscript.CSharp.Parser.Models;
 
 /// <summary>
@@ -16,7 +18,7 @@ public class PluginCallInfo
     public string MethodName { get; set; } = string.Empty;
 
     /// <summary>
-    /// 方法参数数组
+    /// 方法参数值数组
     /// </summary>
     public object[] Parameters { get; set; } = Array.Empty<object>();
 
@@ -25,16 +27,22 @@ public class PluginCallInfo
     /// </summary>
     public Type[] ParameterTypes { get; set; } = Array.Empty<Type>();
 
+    /// <summary>
+    /// 参数名称数组
+    /// </summary>
+    public string[] ParameterNames { get; set; } = Array.Empty<string>();
+
     public PluginCallInfo()
     {
     }
 
-    public PluginCallInfo(string pluginName, string methodName, object[] parameters, Type[] parameterTypes)
+    public PluginCallInfo(string pluginName, string methodName, object[] parameters, Type[] parameterTypes, string[] parameterNames)
     {
         PluginName = pluginName;
         MethodName = methodName;
         Parameters = parameters;
         ParameterTypes = parameterTypes;
+        ParameterNames = parameterNames;
     }
 
     public override string ToString()

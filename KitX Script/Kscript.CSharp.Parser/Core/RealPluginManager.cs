@@ -154,15 +154,15 @@ public class RealPluginManager : IPluginManager
             var functionArgs = new List<Parameter>();
             for (int i = 0; i < callInfo.Parameters.Length; i++)
             {
-                var paramType = callInfo.ParameterTypes[i];
-                var paramValue = callInfo.Parameters[i];
+                var paramValue = callInfo.Parameters[i]?.ToString() ?? string.Empty;
+                var paramName = callInfo.ParameterNames?.Length > i ? callInfo.ParameterNames[i] : $"param{i}";
+                var paramType = callInfo.ParameterTypes?.Length > i ? callInfo.ParameterTypes[i].Name : "string";
 
                 functionArgs.Add(new Parameter
                 {
-                    Name = $"param{i}",
-                    Type = paramType.Name,
-                    // TODO: 等待KitX数据传输标准制定完成后，替换为标准序列化方法
-                    Value = paramValue?.ToString() ?? string.Empty,
+                    Name = paramName,
+                    Type = paramType,
+                    Value = paramValue,
                     IsOptional = false
                 });
             }

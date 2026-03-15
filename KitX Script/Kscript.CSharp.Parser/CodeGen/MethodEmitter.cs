@@ -1,6 +1,7 @@
 using Kscript.CSharp.Parser.Core;
 using Kscript.CSharp.Parser.Exceptions;
 using Kscript.CSharp.Parser.Models;
+using KitX.Shared.CSharp.Plugin;
 using System.Reflection.Emit;
 using System.Runtime.Loader;
 using System.Collections.Concurrent;
@@ -105,6 +106,7 @@ public static class MethodEmitter
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[MethodEmitter] 生成程序集失败: {assemblyName}, 详细错误: {ex}");
             throw new ParserException($"生成程序集失败: {assemblyName}", ex);
         }
     }
@@ -227,13 +229,26 @@ public static class MethodEmitter
                 returnType,
                 parameterTypes);
 
-            // 设置参数名称
+            // 设置参数名称和属性
             for (int i = 0; i < function.Parameters.Count; i++)
             {
                 var param = function.Parameters[i];
-                var paramBuilder = methodBuilder.DefineParameter(i + 1, ParameterAttributes.None, param.Name);
 
-                // 如果参数是可选的，设置默认值
+                // 根据 IsOptional 属性确定参数属性
+                var paramAttributes = ParameterAttributes.None;
+                if (param.IsOptional)
+                {
+                    paramAttributes |= ParameterAttributes.Optional;
+                    // 如果有默认值，设置 HasDefault 标志
+                    if (!string.IsNullOrEmpty(param.Value))
+                    {
+                        paramAttributes |= ParameterAttributes.HasDefault;
+                    }
+                }
+
+                var paramBuilder = methodBuilder.DefineParameter(i + 1, paramAttributes, param.Name);
+
+                // 如果参数是可选的且有默认值，设置默认值
                 if (param.IsOptional && !string.IsNullOrEmpty(param.Value))
                 {
                     var defaultValue = ConvertDefaultValue(param.Value, parameterTypes[i]);
@@ -265,6 +280,7 @@ public static class MethodEmitter
         var callInfoLocal = il.DeclareLocal(typeof(PluginCallInfo));
         var parametersArrayLocal = il.DeclareLocal(typeof(object[]));
         var parameterTypesArrayLocal = il.DeclareLocal(typeof(Type[]));
+        var parameterNamesArrayLocal = il.DeclareLocal(typeof(string[]));
         LocalBuilder? resultLocal = null;
 
         if (returnType != typeof(void))
@@ -272,7 +288,7 @@ public static class MethodEmitter
             resultLocal = il.DeclareLocal(returnType);
         }
 
-        // 创建参数数组
+        // 创建参数值数组
         il.Emit(OpCodes.Ldc_I4, parameterTypes.Length);
         il.Emit(OpCodes.Newarr, typeof(object));
         il.Emit(OpCodes.Stloc, parametersArrayLocal);
@@ -282,9 +298,16 @@ public static class MethodEmitter
         il.Emit(OpCodes.Newarr, typeof(Type));
         il.Emit(OpCodes.Stloc, parameterTypesArrayLocal);
 
-        // 填充参数数组和类型数组
+        // 创建参数名称数组
+        il.Emit(OpCodes.Ldc_I4, parameterTypes.Length);
+        il.Emit(OpCodes.Newarr, typeof(string));
+        il.Emit(OpCodes.Stloc, parameterNamesArrayLocal);
+
+        // 填充参数数组、类型数组和名称数组
         for (int i = 0; i < parameterTypes.Length; i++)
         {
+            var param = function.Parameters[i];
+
             // 填充参数值
             il.Emit(OpCodes.Ldloc, parametersArrayLocal);
             il.Emit(OpCodes.Ldc_I4, i);
@@ -304,6 +327,12 @@ public static class MethodEmitter
             il.Emit(OpCodes.Ldtoken, parameterTypes[i]);
             il.Emit(OpCodes.Call, typeof(Type).GetMethod("GetTypeFromHandle")!);
             il.Emit(OpCodes.Stelem_Ref);
+
+            // 填充参数名称
+            il.Emit(OpCodes.Ldloc, parameterNamesArrayLocal);
+            il.Emit(OpCodes.Ldc_I4, i);
+            il.Emit(OpCodes.Ldstr, param.Name ?? $"param{i}");
+            il.Emit(OpCodes.Stelem_Ref);
         }
 
         // 创建 PluginCallInfo 实例
@@ -311,9 +340,10 @@ public static class MethodEmitter
         il.Emit(OpCodes.Ldstr, function.Name);
         il.Emit(OpCodes.Ldloc, parametersArrayLocal);
         il.Emit(OpCodes.Ldloc, parameterTypesArrayLocal);
+        il.Emit(OpCodes.Ldloc, parameterNamesArrayLocal);
         il.Emit(OpCodes.Newobj, typeof(PluginCallInfo).GetConstructor(new[]
         {
-            typeof(string), typeof(string), typeof(object[]), typeof(Type[])
+            typeof(string), typeof(string), typeof(object[]), typeof(Type[]), typeof(string[])
         })!);
         il.Emit(OpCodes.Stloc, callInfoLocal);
 

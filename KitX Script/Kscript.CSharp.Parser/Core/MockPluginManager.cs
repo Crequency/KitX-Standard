@@ -1,4 +1,5 @@
 using Kscript.CSharp.Parser.Models;
+using KitX.Shared.CSharp.Plugin;
 
 namespace Kscript.CSharp.Parser.Core;
 
@@ -42,7 +43,12 @@ public class MockPluginManager : IPluginManager
     public T Call<T>(PluginCallInfo callInfo)
     {
         Console.WriteLine($"[MockPluginManager] 调用插件方法: {callInfo}");
-        Console.WriteLine($"[MockPluginManager] 参数类型: [{string.Join(", ", callInfo.ParameterTypes.Select(t => t.Name))}]");
+        var paramInfo = callInfo.Parameters.Select((p, i) => {
+            var name = callInfo.ParameterNames?.Length > i ? callInfo.ParameterNames[i] : $"param{i}";
+            var type = callInfo.ParameterTypes?.Length > i ? callInfo.ParameterTypes[i].Name : "object";
+            return $"{name}:{type}={p}";
+        });
+        Console.WriteLine($"[MockPluginManager] 参数: [{string.Join(", ", paramInfo)}]");
         Console.WriteLine($"[MockPluginManager] 期望返回类型: {typeof(T).Name}");
 
         // 简单的模拟实现
@@ -143,11 +149,11 @@ public class MockPluginManager : IPluginManager
                 switch (callInfo.MethodName)
                 {
                     case "Reverse" when callInfo.Parameters.Length >= 1:
-                        return new string(callInfo.Parameters[0].ToString()?.Reverse().ToArray() ?? Array.Empty<char>());
+                        return new string(callInfo.Parameters[0]?.ToString()?.Reverse().ToArray() ?? Array.Empty<char>());
                     case "ToUpper" when callInfo.Parameters.Length >= 1:
-                        return callInfo.Parameters[0].ToString()?.ToUpperInvariant() ?? string.Empty;
+                        return callInfo.Parameters[0]?.ToString()?.ToUpperInvariant() ?? string.Empty;
                     case "Concat" when callInfo.Parameters.Length >= 2:
-                        return callInfo.Parameters[0].ToString() + callInfo.Parameters[1].ToString();
+                        return callInfo.Parameters[0]?.ToString() + callInfo.Parameters[1]?.ToString();
                 }
                 break;
         }
