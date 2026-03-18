@@ -73,6 +73,47 @@ public interface IWorkflowService
     /// </summary>
     /// <param name="plugins">Plugin list</param>
     void UpdateAvailablePlugins(List<PluginInfo> plugins);
+
+    /// <summary>
+    /// 从代码中解析常量
+    /// </summary>
+    /// <param name="code">代码内容</param>
+    /// <returns>常量列表</returns>
+    List<VariableConstant> ParseConstantsFromCode(string code);
+
+    /// <summary>
+    /// 应用常量到代码
+    /// </summary>
+    /// <param name="code">原始代码</param>
+    /// <param name="constants">常量列表</param>
+    /// <returns>应用常量后的代码</returns>
+    string ApplyConstantsToCode(string code, List<VariableConstant> constants);
+
+    /// <summary>
+    /// 合并辅助函数到代码
+    /// </summary>
+    /// <param name="mainCode">主程序代码</param>
+    /// <param name="helperFunctions">辅助函数列表</param>
+    /// <returns>合并后的完整代码</returns>
+    string MergeHelperFunctions(string mainCode, List<HelperFunction> helperFunctions);
+
+    /// <summary>
+    /// 执行KCS代码 - 包含代码分析、常量应用、辅助函数合并
+    /// </summary>
+    /// <param name="mainCode">主程序代码</param>
+    /// <param name="helperFunctions">辅助函数列表</param>
+    /// <param name="constants">可变常量列表</param>
+    /// <param name="requiredPlugins">需要的插件</param>
+    /// <param name="includeTimestamp">是否包含时间戳</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>执行结果</returns>
+    Task<string?> ExecuteKcsCodesAsync(
+        string mainCode,
+        List<HelperFunction> helperFunctions,
+        List<VariableConstant> constants,
+        List<PluginInfo>? requiredPlugins = null,
+        bool includeTimestamp = true,
+        System.Threading.CancellationToken cancellationToken = default);
 }
 
 /// <summary>
