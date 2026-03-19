@@ -22,6 +22,19 @@ public class KcsFileFormat
     /// 可变常量及其用户修改后的值
     /// </summary>
     public Dictionary<string, object?> VariableConstants { get; set; } = [];
+
+    /// <summary>
+    /// 是否使用块脚本模式
+    /// </summary>
+    /// <remarks>
+    /// 当为 true 时，使用 BlockScriptSource 作为脚本内容
+    /// </remarks>
+    public bool UseBlockMode { get; set; } = false;
+
+    /// <summary>
+    /// 块脚本源代码（当 UseBlockMode 为 true 时使用）
+    /// </summary>
+    public string? BlockScriptSource { get; set; }
 }
 
 /// <summary>
