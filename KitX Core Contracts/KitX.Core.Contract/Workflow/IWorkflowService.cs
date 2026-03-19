@@ -114,6 +114,51 @@ public interface IWorkflowService
         List<PluginInfo>? requiredPlugins = null,
         bool includeTimestamp = true,
         System.Threading.CancellationToken cancellationToken = default);
+
+    // ========== Block Script Methods ==========
+
+    /// <summary>
+    /// 解析块脚本
+    /// </summary>
+    /// <param name="sourceCode">块脚本源代码</param>
+    /// <returns>解析结果</returns>
+    BlockScriptParseResult ParseBlockScript(string sourceCode);
+
+    /// <summary>
+    /// 异步解析块脚本
+    /// </summary>
+    Task<BlockScriptParseResult> ParseBlockScriptAsync(string sourceCode);
+
+    /// <summary>
+    /// 验证块脚本
+    /// </summary>
+    /// <param name="sourceCode">块脚本源代码</param>
+    /// <returns>验证结果</returns>
+    BlockScriptValidationResult ValidateBlockScript(string sourceCode);
+
+    /// <summary>
+    /// 执行块脚本
+    /// </summary>
+    /// <param name="script">解析后的块脚本</param>
+    /// <param name="parameters">输入参数</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>执行结果</returns>
+    Task<BlockScriptExecutionResult> ExecuteBlockScriptAsync(
+        BlockScript script,
+        Dictionary<string, object?>? parameters = null,
+        System.Threading.CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 从块脚本源代码执行
+    /// </summary>
+    /// <param name="sourceCode">块脚本源代码</param>
+    /// <param name="parameters">输入参数</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>执行结果</returns>
+    Task<BlockScriptExecutionResult> ExecuteBlockScriptAsync(
+        string sourceCode,
+        Dictionary<string, object?>? parameters = null,
+        System.Threading.CancellationToken cancellationToken = default);
 }
 
 /// <summary>
