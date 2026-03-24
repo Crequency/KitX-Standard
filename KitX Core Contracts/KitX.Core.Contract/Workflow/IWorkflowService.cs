@@ -6,9 +6,9 @@ using KitX.Shared.CSharp.Plugin;
 namespace KitX.Core.Contract.Workflow;
 
 /// <summary>
-/// Workflow service interface
+/// Workflow management interface
 /// </summary>
-public interface IWorkflowService
+public interface IWorkflowManagementService
 {
     /// <summary>
     /// Gets the workflow list
@@ -18,51 +18,60 @@ public interface IWorkflowService
     /// <summary>
     /// Adds a workflow
     /// </summary>
-    /// <param name="workflow">The workflow to add</param>
     void AddWorkflow(IWorkflowCase workflow);
 
     /// <summary>
     /// Removes a workflow
     /// </summary>
-    /// <param name="workflowId">The workflow ID</param>
     void RemoveWorkflow(string workflowId);
 
     /// <summary>
     /// Runs a workflow
     /// </summary>
-    /// <param name="workflowId">The workflow ID</param>
-    /// <returns>True if run was successful</returns>
     Task<bool> RunWorkflowAsync(string workflowId);
 
     /// <summary>
     /// Stops a workflow
     /// </summary>
-    /// <param name="workflowId">The workflow ID</param>
-    /// <returns>True if stop was successful</returns>
     Task<bool> StopWorkflowAsync(string workflowId);
+}
 
+/// <summary>
+/// Script execution interface
+/// </summary>
+public interface IScriptExecutionService
+{
     /// <summary>
     /// Executes a workflow script
     /// </summary>
-    /// <param name="script">The script content</param>
-    /// <param name="parameters">Optional parameters</param>
-    /// <returns>The execution result</returns>
     Task<object?> ExecuteScriptAsync(string script, Dictionary<string, object>? parameters = null);
 
     /// <summary>
     /// Executes workflow script codes with plugin dependencies
     /// </summary>
-    /// <param name="code">The code to execute</param>
-    /// <param name="requiredPlugins">Required plugins for this script</param>
-    /// <param name="includeTimestamp">Whether to include timestamp in result</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Execution result as string</returns>
     Task<string?> ExecuteCodesAsync(
         string code,
         List<PluginInfo>? requiredPlugins = null,
         bool includeTimestamp = true,
         System.Threading.CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Executes KCS codes
+    /// </summary>
+    Task<string?> ExecuteKcsCodesAsync(
+        string mainCode,
+        List<HelperFunction> helperFunctions,
+        List<VariableConstant> constants,
+        List<PluginInfo>? requiredPlugins = null,
+        bool includeTimestamp = true,
+        System.Threading.CancellationToken cancellationToken = default);
+}
+
+/// <summary>
+/// Plugin service interface for workflow constant and helper function handling
+/// </summary>
+public interface IWorkflowPluginService
+{
     /// <summary>
     /// Initializes the plugin manager
     /// </summary>
@@ -71,132 +80,75 @@ public interface IWorkflowService
     /// <summary>
     /// Updates the available plugins list
     /// </summary>
-    /// <param name="plugins">Plugin list</param>
     void UpdateAvailablePlugins(List<PluginInfo> plugins);
 
     /// <summary>
-    /// 从代码中解析常量
+    /// Parses constants from code
     /// </summary>
-    /// <param name="code">代码内容</param>
-    /// <returns>常量列表</returns>
     List<VariableConstant> ParseConstantsFromCode(string code);
 
     /// <summary>
-    /// 应用常量到代码
+    /// Applies constants to code
     /// </summary>
-    /// <param name="code">原始代码</param>
-    /// <param name="constants">常量列表</param>
-    /// <returns>应用常量后的代码</returns>
     string ApplyConstantsToCode(string code, List<VariableConstant> constants);
 
     /// <summary>
-    /// 合并辅助函数到代码
+    /// Merges helper functions into code
     /// </summary>
-    /// <param name="mainCode">主程序代码</param>
-    /// <param name="helperFunctions">辅助函数列表</param>
-    /// <returns>合并后的完整代码</returns>
     string MergeHelperFunctions(string mainCode, List<HelperFunction> helperFunctions);
+}
 
+/// <summary>
+/// Block script service interface
+/// </summary>
+public interface IBlockScriptService
+{
     /// <summary>
-    /// 执行KCS代码 - 包含代码分析、常量应用、辅助函数合并
+    /// Parses a block script
     /// </summary>
-    /// <param name="mainCode">主程序代码</param>
-    /// <param name="helperFunctions">辅助函数列表</param>
-    /// <param name="constants">可变常量列表</param>
-    /// <param name="requiredPlugins">需要的插件</param>
-    /// <param name="includeTimestamp">是否包含时间戳</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>执行结果</returns>
-    Task<string?> ExecuteKcsCodesAsync(
-        string mainCode,
-        List<HelperFunction> helperFunctions,
-        List<VariableConstant> constants,
-        List<PluginInfo>? requiredPlugins = null,
-        bool includeTimestamp = true,
-        System.Threading.CancellationToken cancellationToken = default);
-
-    // ========== Block Script Methods ==========
-
-    /// <summary>
-    /// 解析块脚本
-    /// </summary>
-    /// <param name="sourceCode">块脚本源代码</param>
-    /// <returns>解析结果</returns>
     BlockScriptParseResult ParseBlockScript(string sourceCode);
 
     /// <summary>
-    /// 异步解析块脚本
+    /// Parses a block script asynchronously
     /// </summary>
     Task<BlockScriptParseResult> ParseBlockScriptAsync(string sourceCode);
 
     /// <summary>
-    /// 验证块脚本
+    /// Validates a block script
     /// </summary>
-    /// <param name="sourceCode">块脚本源代码</param>
-    /// <returns>验证结果</returns>
     BlockScriptValidationResult ValidateBlockScript(string sourceCode);
 
     /// <summary>
-    /// 执行块脚本
+    /// Executes a block script
     /// </summary>
-    /// <param name="script">解析后的块脚本</param>
-    /// <param name="parameters">输入参数</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>执行结果</returns>
     Task<BlockScriptExecutionResult> ExecuteBlockScriptAsync(
         BlockScript script,
         Dictionary<string, object?>? parameters = null,
         System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 从块脚本源代码执行
+    /// Executes a block script from source code
     /// </summary>
-    /// <param name="sourceCode">块脚本源代码</param>
-    /// <param name="parameters">输入参数</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>执行结果</returns>
     Task<BlockScriptExecutionResult> ExecuteBlockScriptAsync(
         string sourceCode,
         Dictionary<string, object?>? parameters = null,
         System.Threading.CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Executes a block script from source code with helper functions
+    /// </summary>
+    Task<BlockScriptExecutionResult> ExecuteBlockScriptAsync(
+        string sourceCode,
+        List<HelperFunction> helperFunctions,
+        System.Threading.CancellationToken cancellationToken = default);
 }
 
 /// <summary>
-/// Plugin service provider interface for workflow integration
+/// Workflow service interface - composite interface for backward compatibility
 /// </summary>
-public interface IPluginServiceProvider
+public interface IWorkflowService : IWorkflowManagementService, IScriptExecutionService,
+    IWorkflowPluginService, IBlockScriptService
 {
-    /// <summary>
-    /// Gets running plugins
-    /// </summary>
-    IEnumerable<PluginInfo> GetRunningPlugins();
-
-    /// <summary>
-    /// Finds a plugin by name
-    /// </summary>
-    /// <param name="pluginName">The plugin name</param>
-    /// <returns>The plugin info or null if not found</returns>
-    PluginInfo? FindPlugin(string pluginName);
-
-    /// <summary>
-    /// Finds a connector for a plugin
-    /// </summary>
-    /// <param name="pluginInfo">The plugin info</param>
-    /// <returns>The connector or null if not found</returns>
-    object? FindConnector(PluginInfo pluginInfo);
-
-    /// <summary>
-    /// Sends a request asynchronously
-    /// </summary>
-    /// <param name="connector">The connector</param>
-    /// <param name="request">The request</param>
-    Task SendRequestAsync(object connector, object request);
-
-    /// <summary>
-    /// Subscribes to plugin responses
-    /// </summary>
-    /// <param name="responseHandler">The response handler</param>
-    void SubscribeToResponses(Action<string, string> responseHandler);
 }
 
 /// <summary>

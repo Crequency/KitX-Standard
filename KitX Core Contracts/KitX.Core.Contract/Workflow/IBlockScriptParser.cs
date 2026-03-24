@@ -46,15 +46,6 @@ public interface IBlockScriptExecutor
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Executes a specific block by name
-    /// </summary>
-    Task<BlockScriptExecutionResult> ExecuteBlockAsync(
-        BlockScript script,
-        string blockName,
-        Dictionary<string, object?>? parameters = null,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// Validates a block script
     /// </summary>
     BlockScriptValidationResult Validate(BlockScript script);
@@ -69,11 +60,6 @@ public interface IBlockScopeManager
     /// Gets the global (ConstBlock) scope
     /// </summary>
     IBlockScope GlobalScope { get; }
-
-    /// <summary>
-    /// Creates a new local scope for a block
-    /// </summary>
-    IBlockScope CreateLocalScope(string blockName);
 
     /// <summary>
     /// Resolves a variable name to its value (searches local then global)

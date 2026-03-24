@@ -26,7 +26,12 @@ public enum BlockType
     /// <summary>
     /// Public variable block - globally scoped and writable, but not exposed in UI editor
     /// </summary>
-    PubVarBlock
+    PubVarBlock,
+
+    /// <summary>
+    /// Loop block - auto-generated block containing a Loop statement
+    /// </summary>
+    LoopBlock
 }
 
 /// <summary>
@@ -50,7 +55,7 @@ public class BlockDefinition
     public List<VariableDeclaration> Variables { get; set; } = [];
 
     /// <summary>
-    /// Statements in this block
+    /// Statements in this block (excluding Loop statements, which are separated)
     /// </summary>
     public List<BlockStatement> Statements { get; set; } = [];
 
@@ -58,6 +63,17 @@ public class BlockDefinition
     /// Line number in source where this block starts
     /// </summary>
     public int LineNumber { get; set; }
+
+    /// <summary>
+    /// Name of the next block to execute when this block ends naturally
+    /// (i.e., not ended by Branch/Loop/LoopBodyEnd)
+    /// </summary>
+    public string? NextBlockName { get; set; }
+
+    /// <summary>
+    /// For LoopBlock: the block name containing this loop (i.e., the parent block)
+    /// </summary>
+    public string? ParentBlockName { get; set; }
 }
 
 /// <summary>
@@ -135,7 +151,7 @@ public enum FlowControlType
     Branch,
 
     /// <summary>
-    /// Loop back to a block while condition is true
+    /// Loop while condition is true (Loop has three args: condition, trueBlock, falseBlock)
     /// </summary>
     Loop,
 
@@ -150,9 +166,9 @@ public enum FlowControlType
     Break,
 
     /// <summary>
-    /// Continue to next iteration
+    /// Loop body end - marks the end of a loop body and returns to loop condition
     /// </summary>
-    Continue
+    LoopBodyEnd
 }
 
 /// <summary>
@@ -171,19 +187,20 @@ public class FlowControlStatement : BlockStatement
     public string ConditionExpression { get; set; } = string.Empty;
 
     /// <summary>
-    /// Target block name when condition is true (for Branch)
+    /// Target block name when condition is true (for Branch/Loop)
     /// </summary>
     public string TrueBlockName { get; set; } = string.Empty;
 
     /// <summary>
-    /// Target block name when condition is false (for Branch)
+    /// Target block name when condition is false (for Branch/Loop)
+    /// For Loop: this is the loop exit block
     /// </summary>
     public string FalseBlockName { get; set; } = string.Empty;
 
     /// <summary>
-    /// Loop body block name (for Loop)
+    /// For LoopBodyEnd: the block name containing the Loop statement to return to
     /// </summary>
-    public string? LoopBlockName { get; set; }
+    public string? LoopBodyEndReturnTo { get; set; }
 }
 
 /// <summary>
@@ -217,9 +234,50 @@ public class BlockScript
     public List<BlockDefinition> AllBlocks { get; set; } = [];
 
     /// <summary>
-    /// Raw source code
+    /// Loop blocks dictionary by parent block name
+    /// (e.g., "MainBlock" -> LoopBlock for MainBlock's Loop statement)
+    /// </summary>
+    public Dictionary<string, BlockDefinition> LoopBlocks { get; set; } = [];
+
+    /// <summary>
+    /// Raw source code (parsed input, may not include helper functions)
     /// </summary>
     public string SourceCode { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Full source code including merged helper functions (for execution)
+    /// </summary>
+    public string FullSourceCode { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Helper functions to be made available in script execution context
+    /// </summary>
+    public List<HelperFunction> HelperFunctions { get; set; } = [];
+
+
+    /// <summary>
+    /// Gets a block by name (checks NamedBlocks, MainBlock, ConstBlock, PubVarBlock, then LoopBlocks)
+    /// Note: LoopBlocks is checked last because its keys are parent block names (e.g., "MainBlock")
+    /// which would otherwise shadow the actual MainBlock when querying by name.
+    /// </summary>
+    public BlockDefinition? GetBlockByName(string name)
+    {
+        // First check NamedBlocks (user-defined blocks)
+        if (NamedBlocks.TryGetValue(name, out var namedBlock))
+            return namedBlock;
+        // Then check the standard blocks by name match
+        if (MainBlock?.Name == name)
+            return MainBlock;
+        if (ConstBlock?.Name == name)
+            return ConstBlock;
+        if (PubVarBlock?.Name == name)
+            return PubVarBlock;
+        // Finally check LoopBlocks - these are internal and should not shadow standard blocks
+        // LoopBlocks keys are parent block names (e.g., "MainBlock" -> LoopBlock for that parent)
+        if (LoopBlocks.TryGetValue(name, out var loopBlock))
+            return loopBlock;
+        return null;
+    }
 }
 
 /// <summary>
@@ -316,68 +374,48 @@ public class BlockScriptExecutionResult
 }
 
 /// <summary>
-/// Flow control result returned by built-in functions
+/// Result of executing a block - used by state machine for flow control
 /// </summary>
-public class FlowResult
+public class BlockExecutionResult
 {
     /// <summary>
-    /// Type of flow result
-    /// </summary>
-    public FlowResultType Type { get; set; }
-
-    /// <summary>
-    /// Target block name for jumps
-    /// </summary>
-    public string? TargetBlock { get; set; }
-
-    /// <summary>
-    /// Optional value (for return)
-    /// </summary>
-    public object? Value { get; set; }
-
-    /// <summary>
-    /// Whether execution should continue
+    /// Whether execution should continue to next block
     /// </summary>
     public bool ShouldContinue { get; set; } = true;
 
     /// <summary>
-    /// Continue to next statement
+    /// Name of the next block to execute (null means end of script)
     /// </summary>
-    public static FlowResult Continue() => new() { Type = FlowResultType.Continue, ShouldContinue = true };
+    public string? NextBlockName { get; set; }
 
     /// <summary>
-    /// Return with a value
+    /// Whether this is a return (end of entire script)
     /// </summary>
-    public static FlowResult Return(object? value = null) => new() { Type = FlowResultType.Return, Value = value, ShouldContinue = false };
+    public bool IsReturn { get; set; }
 
     /// <summary>
-    /// Break from loop
+    /// Return value if IsReturn is true
     /// </summary>
-    public static FlowResult Break() => new() { Type = FlowResultType.Break, ShouldContinue = false };
-}
-
-/// <summary>
-/// Flow result types
-/// </summary>
-public enum FlowResultType
-{
-    /// <summary>
-    /// Continue to next statement
-    /// </summary>
-    Continue,
+    public object? ReturnValue { get; set; }
 
     /// <summary>
-    /// Return from script
+    /// Create a result for continuing to next block
     /// </summary>
-    Return,
+    public static BlockExecutionResult ContinueTo(string? nextBlockName) => new()
+    {
+        ShouldContinue = true,
+        NextBlockName = nextBlockName,
+        IsReturn = false
+    };
 
     /// <summary>
-    /// Break from loop
+    /// Create a result for end of script
     /// </summary>
-    Break,
-
-    /// <summary>
-    /// Continue to next loop iteration
-    /// </summary>
-    ContinueLoop
+    public static BlockExecutionResult Return(object? value = null) => new()
+    {
+        ShouldContinue = false,
+        NextBlockName = null,
+        IsReturn = true,
+        ReturnValue = value
+    };
 }
