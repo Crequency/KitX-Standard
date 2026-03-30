@@ -35,6 +35,12 @@ public class KcsFileFormat
     /// 块脚本源代码（当 UseBlockMode 为 true 时使用）
     /// </summary>
     public string? BlockScriptSource { get; set; }
+
+    /// <summary>
+    /// 蓝图可视化数据（包含节点位置、连接关系、视图状态等）
+    /// 当 UseBlockMode=true 且此字段非空时，表示该脚本有对应的蓝图编辑状态
+    /// </summary>
+    public Blueprint? BlueprintData { get; set; }
 }
 
 /// <summary>

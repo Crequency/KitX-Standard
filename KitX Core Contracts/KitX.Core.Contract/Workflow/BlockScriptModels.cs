@@ -256,15 +256,25 @@ public class BlockScript
 
 
     /// <summary>
-    /// Gets a block by name (checks NamedBlocks, MainBlock, ConstBlock, PubVarBlock, then LoopBlocks)
-    /// Note: LoopBlocks is checked last because its keys are parent block names (e.g., "MainBlock")
-    /// which would otherwise shadow the actual MainBlock when querying by name.
+    /// Gets a block by name (checks LoopBlocks first by block name, then NamedBlocks, then standard blocks)
+    /// IMPORTANT: LoopBlocks are checked FIRST because LoopBlock names (like "LoopBody") should NOT be
+    /// shadowed by user-defined NamedBlocks with the same name.
     /// </summary>
     public BlockDefinition? GetBlockByName(string name)
     {
-        // First check NamedBlocks (user-defined blocks)
+        // First check LoopBlocks by the block's own name (not parent block name)
+        // This is critical because LoopBlocks are created for "NextBlock = Loop(...)" statements
+        // and their names (like "LoopBody") should take precedence over user-defined blocks
+        foreach (var kvp in LoopBlocks)
+        {
+            if (kvp.Value.Name == name)
+                return kvp.Value;
+        }
+
+        // Then check NamedBlocks (user-defined blocks)
         if (NamedBlocks.TryGetValue(name, out var namedBlock))
             return namedBlock;
+
         // Then check the standard blocks by name match
         if (MainBlock?.Name == name)
             return MainBlock;
@@ -272,10 +282,7 @@ public class BlockScript
             return ConstBlock;
         if (PubVarBlock?.Name == name)
             return PubVarBlock;
-        // Finally check LoopBlocks - these are internal and should not shadow standard blocks
-        // LoopBlocks keys are parent block names (e.g., "MainBlock" -> LoopBlock for that parent)
-        if (LoopBlocks.TryGetValue(name, out var loopBlock))
-            return loopBlock;
+
         return null;
     }
 }
@@ -419,3 +426,4 @@ public class BlockExecutionResult
         ReturnValue = value
     };
 }
+
