@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace KitX.Core.Contract.Workflow;
@@ -732,11 +733,15 @@ public class Blueprint
     }
 
     /// <summary>
-    /// Add a connection to this blueprint
+    /// Add a connection to this blueprint (deduplicates by source/target/pin)
     /// </summary>
     /// <param name="connection">Connection to add</param>
     public void AddConnection(BlueprintConnection connection)
     {
-        Connections.Add(connection);
+        var alreadyExists = Connections.Any(c =>
+            c.SourceNodeId == connection.SourceNodeId && c.SourcePinId == connection.SourcePinId &&
+            c.TargetNodeId == connection.TargetNodeId && c.TargetPinId == connection.TargetPinId);
+        if (!alreadyExists)
+            Connections.Add(connection);
     }
 }
