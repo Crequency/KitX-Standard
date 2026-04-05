@@ -158,11 +158,6 @@ public class BlueprintPin
     /// Default value for input pins
     /// </summary>
     public string? DefaultValue { get; set; }
-
-    /// <summary>
-    /// Connected pin ID (for runtime connections)
-    /// </summary>
-    public string? ConnectedPinId { get; set; }
 }
 
 /// <summary>
