@@ -130,6 +130,28 @@ public enum PinType
 }
 
 /// <summary>
+/// Describes a pin's layout within a node template.
+/// Used for self-describing node pin configurations.
+/// </summary>
+public record PinDescriptor(
+    string Name,
+    PinType Type,
+    double RelativeY
+);
+
+/// <summary>
+/// Describes a node type's layout and pin configuration.
+/// Each node subclass provides its own descriptor via GetDescriptor().
+/// </summary>
+public record NodeDescriptor(
+    double Width,
+    double Height,
+    IReadOnlyList<PinDescriptor> InputPins,
+    IReadOnlyList<PinDescriptor> OutputPins,
+    string DisplayName
+);
+
+/// <summary>
 /// Pin on a blueprint node
 /// </summary>
 public class BlueprintPin
@@ -242,6 +264,19 @@ public abstract class BlueprintNode
         foreach (var pin in OutputPins)
             yield return pin;
     }
+
+    /// <summary>
+    /// Returns the layout descriptor for this node type.
+    /// Each node subclass must define its own pin layout, width, and height.
+    /// Used by the node registry and UI rendering to avoid external switch statements.
+    /// </summary>
+    public abstract NodeDescriptor GetDescriptor();
+
+    /// <summary>
+    /// Returns the display title for UI rendering (e.g., "Call: Plugin.Func").
+    /// Default implementation returns Name; subclasses override for richer display.
+    /// </summary>
+    public virtual string GetDisplayTitle() => Name;
 }
 
 // Node-specific classes can be defined for additional properties
@@ -263,6 +298,13 @@ public class EntryNode : BlueprintNode
             Type = PinType.Execution
         });
     }
+
+    public override NodeDescriptor GetDescriptor() => new(
+        Width: 120, Height: 60,
+        InputPins: [],
+        OutputPins: [new PinDescriptor("Exec", PinType.Execution, 30)],
+        DisplayName: "Entry"
+    );
 }
 
 /// <summary>
@@ -299,6 +341,19 @@ public class BranchNode : BlueprintNode
             Type = PinType.Execution
         });
     }
+
+    public override NodeDescriptor GetDescriptor() => new(
+        Width: 120, Height: 80,
+        InputPins: [
+            new PinDescriptor("Exec", PinType.Execution, 30),
+            new PinDescriptor("Condition", PinType.Boolean, 50)
+        ],
+        OutputPins: [
+            new PinDescriptor("True", PinType.Execution, 30),
+            new PinDescriptor("False", PinType.Execution, 50)
+        ],
+        DisplayName: "Branch"
+    );
 }
 
 /// <summary>
@@ -335,6 +390,19 @@ public class LoopNode : BlueprintNode
             Type = PinType.Execution
         });
     }
+
+    public override NodeDescriptor GetDescriptor() => new(
+        Width: 120, Height: 80,
+        InputPins: [
+            new PinDescriptor("Exec", PinType.Execution, 30),
+            new PinDescriptor("Condition", PinType.Boolean, 50)
+        ],
+        OutputPins: [
+            new PinDescriptor("LoopBody", PinType.Execution, 30),
+            new PinDescriptor("LoopEnd", PinType.Execution, 50)
+        ],
+        DisplayName: "Loop"
+    );
 }
 
 /// <summary>
@@ -353,6 +421,13 @@ public class BreakNode : BlueprintNode
             Type = PinType.Execution
         });
     }
+
+    public override NodeDescriptor GetDescriptor() => new(
+        Width: 100, Height: 40,
+        InputPins: [new PinDescriptor("Exec", PinType.Execution, 20)],
+        OutputPins: [],
+        DisplayName: "Break"
+    );
 }
 
 /// <summary>
@@ -386,6 +461,15 @@ public class ConstNode : BlueprintNode
             Type = PinType.Any
         });
     }
+
+    public override NodeDescriptor GetDescriptor() => new(
+        Width: 120, Height: 50,
+        InputPins: [],
+        OutputPins: [new PinDescriptor("Value", PinType.Any, 25)],
+        DisplayName: "Const"
+    );
+
+    public override string GetDisplayTitle() => $"Const: {ConstName}";
 }
 
 /// <summary>
@@ -426,6 +510,19 @@ public class CallNode : BlueprintNode
             Type = PinType.Any
         });
     }
+
+    public override NodeDescriptor GetDescriptor() => new(
+        Width: 140, Height: 60,
+        InputPins: [new PinDescriptor("Exec", PinType.Execution, 20)],
+        OutputPins: [
+            new PinDescriptor("Exec", PinType.Execution, 20),
+            new PinDescriptor("Return", PinType.Any, 40)
+        ],
+        DisplayName: "Call"
+    );
+
+    public override string GetDisplayTitle()
+        => string.IsNullOrEmpty(PluginName) ? $"Call: {FunctionName}" : $"Call: {PluginName}.{FunctionName}";
 }
 
 /// <summary>
@@ -461,6 +558,18 @@ public class CallHelperNode : BlueprintNode
             Type = PinType.Any
         });
     }
+
+    public override NodeDescriptor GetDescriptor() => new(
+        Width: 130, Height: 50,
+        InputPins: [new PinDescriptor("Exec", PinType.Execution, 25)],
+        OutputPins: [
+            new PinDescriptor("Exec", PinType.Execution, 25),
+            new PinDescriptor("Return", PinType.Any, 40)
+        ],
+        DisplayName: "CallHelper"
+    );
+
+    public override string GetDisplayTitle() => $"Helper: {HelperFunctionName}";
 }
 
 /// <summary>
@@ -496,6 +605,18 @@ public class GetNode : BlueprintNode
             Type = PinType.Any
         });
     }
+
+    public override NodeDescriptor GetDescriptor() => new(
+        Width: 120, Height: 60,
+        InputPins: [new PinDescriptor("Exec", PinType.Execution, 20)],
+        OutputPins: [
+            new PinDescriptor("Exec", PinType.Execution, 20),
+            new PinDescriptor("Value", PinType.Any, 40)
+        ],
+        DisplayName: "Get"
+    );
+
+    public override string GetDisplayTitle() => $"Get: {VarName}";
 }
 
 /// <summary>
@@ -531,6 +652,18 @@ public class SetNode : BlueprintNode
             Type = PinType.Execution
         });
     }
+
+    public override NodeDescriptor GetDescriptor() => new(
+        Width: 120, Height: 60,
+        InputPins: [
+            new PinDescriptor("Exec", PinType.Execution, 20),
+            new PinDescriptor("Value", PinType.Any, 40)
+        ],
+        OutputPins: [new PinDescriptor("Exec", PinType.Execution, 20)],
+        DisplayName: "Set"
+    );
+
+    public override string GetDisplayTitle() => $"Set: {VarName}";
 }
 
 /// <summary>
@@ -561,6 +694,16 @@ public class PrintNode : BlueprintNode
             Type = PinType.Execution
         });
     }
+
+    public override NodeDescriptor GetDescriptor() => new(
+        Width: 100, Height: 50,
+        InputPins: [
+            new PinDescriptor("Exec", PinType.Execution, 20),
+            new PinDescriptor("Value", PinType.Any, 35)
+        ],
+        OutputPins: [new PinDescriptor("Exec", PinType.Execution, 25)],
+        DisplayName: "Print"
+    );
 }
 
 /// <summary>
@@ -591,6 +734,16 @@ public class PauseNode : BlueprintNode
             Type = PinType.Execution
         });
     }
+
+    public override NodeDescriptor GetDescriptor() => new(
+        Width: 100, Height: 50,
+        InputPins: [
+            new PinDescriptor("Exec", PinType.Execution, 20),
+            new PinDescriptor("Milliseconds", PinType.Integer, 35)
+        ],
+        OutputPins: [new PinDescriptor("Exec", PinType.Execution, 25)],
+        DisplayName: "Pause"
+    );
 }
 
 /// <summary>
