@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace KitX.Core.Contract.Workflow;
@@ -238,8 +239,10 @@ public abstract class BlueprintNode
     public List<BlueprintPin> OutputPins { get; set; } = [];
 
     /// <summary>
-    /// Parent blueprint reference (set when node is added to blueprint)
+    /// Parent blueprint reference (set when node is added to blueprint).
+    /// Ignored during JSON serialization to prevent circular reference.
     /// </summary>
+    [JsonIgnore]
     public Blueprint? Blueprint { get; set; }
 
     /// <summary>
@@ -783,6 +786,49 @@ public class BlueprintConnection
 }
 
 /// <summary>
+/// Records a named block scope within a Blueprint.
+/// Captures which nodes belong to a logical block,
+/// preserving BlockScript block boundaries for reverse conversion.
+/// </summary>
+public class BlueprintBlockScope
+{
+    /// <summary>
+    /// Block name (stable across round-trips, e.g. "MainBlock", "LoopBody", "SuccessLogic").
+    /// </summary>
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Ordered list of node IDs that belong to this block.
+    /// </summary>
+    public List<string> NodeIds { get; set; } = [];
+
+    /// <summary>
+    /// Name of the next block to execute when this block ends naturally
+    /// (i.e., not ended by Branch/Loop/LoopBodyEnd). Null if the block ends
+    /// with a control-flow statement or is terminal.
+    /// </summary>
+    public string? NextBlockName { get; set; }
+
+    /// <summary>
+    /// For sub-blocks: the node ID of the Branch/Loop node that created this scope.
+    /// Null for the main block scope.
+    /// </summary>
+    public string? OwnerNodeId { get; set; }
+
+    /// <summary>
+    /// For sub-blocks: which output arm of the owner node leads into this scope.
+    /// E.g., "True", "False" for Branch; "LoopBody", "LoopEnd" for Loop.
+    /// Null for the main block scope.
+    /// </summary>
+    public string? OwnerArmName { get; set; }
+
+    /// <summary>
+    /// Whether this block scope represents the main entry block.
+    /// </summary>
+    public bool IsMainBlock { get; set; }
+}
+
+/// <summary>
 /// Blueprint document container
 /// </summary>
 public class Blueprint
@@ -841,6 +887,12 @@ public class Blueprint
     /// Constant values (from ConstBlock)
     /// </summary>
     public List<VariableConstant> ConstValues { get; set; } = [];
+
+    /// <summary>
+    /// Named block scopes recording which nodes belong to which logical block.
+    /// Empty for legacy blueprints that predate this field.
+    /// </summary>
+    public List<BlueprintBlockScope> BlockScopes { get; set; } = [];
 
     /// <summary>
     /// Get node by ID
