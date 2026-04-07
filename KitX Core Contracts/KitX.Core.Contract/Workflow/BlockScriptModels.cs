@@ -201,6 +201,24 @@ public class FlowControlStatement : BlockStatement
     /// For LoopBodyEnd: the block name containing the Loop statement to return to
     /// </summary>
     public string? LoopBodyEndReturnTo { get; set; }
+
+    /// <summary>
+    /// Regenerates SourceCode from current field values.
+    /// Call after updating TrueBlockName/FalseBlockName/etc. to keep SourceCode in sync.
+    /// </summary>
+    public void RegenerateSourceCode()
+    {
+        SourceCode = ControlType switch
+        {
+            FlowControlType.Branch => $"NextBlock = Branch({ConditionExpression}, \"{TrueBlockName}\", \"{FalseBlockName}\");",
+            FlowControlType.Loop => $"NextBlock = Loop({ConditionExpression}, \"{TrueBlockName}\", \"{FalseBlockName}\");",
+            FlowControlType.LoopBodyEnd => LoopBodyEndReturnTo != null
+                ? $"NextBlock = LoopBodyEnd(\"{LoopBodyEndReturnTo}\");"
+                : "LoopBodyEnd();",
+            FlowControlType.Break => "Break();",
+            _ => SourceCode
+        };
+    }
 }
 
 /// <summary>

@@ -280,6 +280,20 @@ public abstract class BlueprintNode
     /// Default implementation returns Name; subclasses override for richer display.
     /// </summary>
     public virtual string GetDisplayTitle() => Name;
+
+    /// <summary>
+    /// Initializes InputPins and OutputPins from GetDescriptor().
+    /// Subclasses should call this in their constructor instead of manually adding pins.
+    /// This ensures the descriptor is the single source of truth for pin layout.
+    /// </summary>
+    protected void InitializePinsFromDescriptor()
+    {
+        var desc = GetDescriptor();
+        foreach (var pd in desc.InputPins)
+            InputPins.Add(new BlueprintPin { Name = pd.Name, Direction = PinDirection.Input, Type = pd.Type });
+        foreach (var pd in desc.OutputPins)
+            OutputPins.Add(new BlueprintPin { Name = pd.Name, Direction = PinDirection.Output, Type = pd.Type });
+    }
 }
 
 // Node-specific classes can be defined for additional properties
@@ -294,12 +308,7 @@ public class EntryNode : BlueprintNode
     {
         NodeType = BlueprintNodeType.Entry;
         Name = "Entry";
-        OutputPins.Add(new BlueprintPin
-        {
-            Name = "Exec",
-            Direction = PinDirection.Output,
-            Type = PinType.Execution
-        });
+        InitializePinsFromDescriptor();
     }
 
     public override NodeDescriptor GetDescriptor() => new(
@@ -319,30 +328,7 @@ public class BranchNode : BlueprintNode
     {
         NodeType = BlueprintNodeType.Branch;
         Name = "Branch";
-        InputPins.Add(new BlueprintPin
-        {
-            Name = "Exec",
-            Direction = PinDirection.Input,
-            Type = PinType.Execution
-        });
-        InputPins.Add(new BlueprintPin
-        {
-            Name = "Condition",
-            Direction = PinDirection.Input,
-            Type = PinType.Boolean
-        });
-        OutputPins.Add(new BlueprintPin
-        {
-            Name = "True",
-            Direction = PinDirection.Output,
-            Type = PinType.Execution
-        });
-        OutputPins.Add(new BlueprintPin
-        {
-            Name = "False",
-            Direction = PinDirection.Output,
-            Type = PinType.Execution
-        });
+        InitializePinsFromDescriptor();
     }
 
     public override NodeDescriptor GetDescriptor() => new(
@@ -368,30 +354,7 @@ public class LoopNode : BlueprintNode
     {
         NodeType = BlueprintNodeType.Loop;
         Name = "Loop";
-        InputPins.Add(new BlueprintPin
-        {
-            Name = "Exec",
-            Direction = PinDirection.Input,
-            Type = PinType.Execution
-        });
-        InputPins.Add(new BlueprintPin
-        {
-            Name = "Condition",
-            Direction = PinDirection.Input,
-            Type = PinType.Boolean
-        });
-        OutputPins.Add(new BlueprintPin
-        {
-            Name = "LoopBody",
-            Direction = PinDirection.Output,
-            Type = PinType.Execution
-        });
-        OutputPins.Add(new BlueprintPin
-        {
-            Name = "LoopEnd",
-            Direction = PinDirection.Output,
-            Type = PinType.Execution
-        });
+        InitializePinsFromDescriptor();
     }
 
     public override NodeDescriptor GetDescriptor() => new(
@@ -417,12 +380,7 @@ public class BreakNode : BlueprintNode
     {
         NodeType = BlueprintNodeType.Break;
         Name = "Break";
-        InputPins.Add(new BlueprintPin
-        {
-            Name = "Exec",
-            Direction = PinDirection.Input,
-            Type = PinType.Execution
-        });
+        InitializePinsFromDescriptor();
     }
 
     public override NodeDescriptor GetDescriptor() => new(
@@ -457,12 +415,7 @@ public class ConstNode : BlueprintNode
     {
         NodeType = BlueprintNodeType.Const;
         Name = "Const";
-        OutputPins.Add(new BlueprintPin
-        {
-            Name = "Value",
-            Direction = PinDirection.Output,
-            Type = PinType.Any
-        });
+        InitializePinsFromDescriptor();
     }
 
     public override NodeDescriptor GetDescriptor() => new(
@@ -494,24 +447,7 @@ public class CallNode : BlueprintNode
     {
         NodeType = BlueprintNodeType.Call;
         Name = "Call";
-        InputPins.Add(new BlueprintPin
-        {
-            Name = "Exec",
-            Direction = PinDirection.Input,
-            Type = PinType.Execution
-        });
-        OutputPins.Add(new BlueprintPin
-        {
-            Name = "Exec",
-            Direction = PinDirection.Output,
-            Type = PinType.Execution
-        });
-        OutputPins.Add(new BlueprintPin
-        {
-            Name = "Return",
-            Direction = PinDirection.Output,
-            Type = PinType.Any
-        });
+        InitializePinsFromDescriptor();
     }
 
     public override NodeDescriptor GetDescriptor() => new(
@@ -542,24 +478,7 @@ public class CallHelperNode : BlueprintNode
     {
         NodeType = BlueprintNodeType.CallHelper;
         Name = "CallHelper";
-        InputPins.Add(new BlueprintPin
-        {
-            Name = "Exec",
-            Direction = PinDirection.Input,
-            Type = PinType.Execution
-        });
-        OutputPins.Add(new BlueprintPin
-        {
-            Name = "Exec",
-            Direction = PinDirection.Output,
-            Type = PinType.Execution
-        });
-        OutputPins.Add(new BlueprintPin
-        {
-            Name = "Return",
-            Direction = PinDirection.Output,
-            Type = PinType.Any
-        });
+        InitializePinsFromDescriptor();
     }
 
     public override NodeDescriptor GetDescriptor() => new(
@@ -589,24 +508,7 @@ public class GetNode : BlueprintNode
     {
         NodeType = BlueprintNodeType.Get;
         Name = "Get";
-        InputPins.Add(new BlueprintPin
-        {
-            Name = "Exec",
-            Direction = PinDirection.Input,
-            Type = PinType.Execution
-        });
-        OutputPins.Add(new BlueprintPin
-        {
-            Name = "Exec",
-            Direction = PinDirection.Output,
-            Type = PinType.Execution
-        });
-        OutputPins.Add(new BlueprintPin
-        {
-            Name = "Value",
-            Direction = PinDirection.Output,
-            Type = PinType.Any
-        });
+        InitializePinsFromDescriptor();
     }
 
     public override NodeDescriptor GetDescriptor() => new(
@@ -636,24 +538,7 @@ public class SetNode : BlueprintNode
     {
         NodeType = BlueprintNodeType.Set;
         Name = "Set";
-        InputPins.Add(new BlueprintPin
-        {
-            Name = "Exec",
-            Direction = PinDirection.Input,
-            Type = PinType.Execution
-        });
-        InputPins.Add(new BlueprintPin
-        {
-            Name = "Value",
-            Direction = PinDirection.Input,
-            Type = PinType.Any
-        });
-        OutputPins.Add(new BlueprintPin
-        {
-            Name = "Exec",
-            Direction = PinDirection.Output,
-            Type = PinType.Execution
-        });
+        InitializePinsFromDescriptor();
     }
 
     public override NodeDescriptor GetDescriptor() => new(
@@ -678,24 +563,7 @@ public class PrintNode : BlueprintNode
     {
         NodeType = BlueprintNodeType.Print;
         Name = "Print";
-        InputPins.Add(new BlueprintPin
-        {
-            Name = "Exec",
-            Direction = PinDirection.Input,
-            Type = PinType.Execution
-        });
-        InputPins.Add(new BlueprintPin
-        {
-            Name = "Value",
-            Direction = PinDirection.Input,
-            Type = PinType.Any
-        });
-        OutputPins.Add(new BlueprintPin
-        {
-            Name = "Exec",
-            Direction = PinDirection.Output,
-            Type = PinType.Execution
-        });
+        InitializePinsFromDescriptor();
     }
 
     public override NodeDescriptor GetDescriptor() => new(
@@ -718,24 +586,7 @@ public class PauseNode : BlueprintNode
     {
         NodeType = BlueprintNodeType.Pause;
         Name = "Pause";
-        InputPins.Add(new BlueprintPin
-        {
-            Name = "Exec",
-            Direction = PinDirection.Input,
-            Type = PinType.Execution
-        });
-        InputPins.Add(new BlueprintPin
-        {
-            Name = "Milliseconds",
-            Direction = PinDirection.Input,
-            Type = PinType.Integer
-        });
-        OutputPins.Add(new BlueprintPin
-        {
-            Name = "Exec",
-            Direction = PinDirection.Output,
-            Type = PinType.Execution
-        });
+        InitializePinsFromDescriptor();
     }
 
     public override NodeDescriptor GetDescriptor() => new(
