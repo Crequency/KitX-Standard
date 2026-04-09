@@ -184,8 +184,22 @@ public class BlueprintPin
 }
 
 /// <summary>
-/// Base class for all blueprint nodes
+/// Base class for all blueprint nodes.
+/// Uses polymorphic JSON serialization so that concrete node types
+/// round-trip correctly through System.Text.Json.
 /// </summary>
+[JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToBaseType)]
+[JsonDerivedType(typeof(EntryNode), "Entry")]
+[JsonDerivedType(typeof(BranchNode), "Branch")]
+[JsonDerivedType(typeof(LoopNode), "Loop")]
+[JsonDerivedType(typeof(BreakNode), "Break")]
+[JsonDerivedType(typeof(ConstNode), "Const")]
+[JsonDerivedType(typeof(CallNode), "Call")]
+[JsonDerivedType(typeof(CallHelperNode), "CallHelper")]
+[JsonDerivedType(typeof(GetNode), "Get")]
+[JsonDerivedType(typeof(SetNode), "Set")]
+[JsonDerivedType(typeof(PrintNode), "Print")]
+[JsonDerivedType(typeof(PauseNode), "Pause")]
 public abstract class BlueprintNode
 {
     /// <summary>
