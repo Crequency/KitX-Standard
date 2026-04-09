@@ -147,6 +147,16 @@ public interface IBlockScriptService
         string sourceCode,
         List<HelperFunction> helperFunctions,
         System.Threading.CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Executes a block script from source code with helper functions and constant overrides.
+    /// Constant overrides replace the DefaultValue on ConstBlock variables before execution.
+    /// </summary>
+    Task<BlockScriptExecutionResult> ExecuteBlockScriptAsync(
+        string sourceCode,
+        List<HelperFunction> helperFunctions,
+        Dictionary<string, object?>? constantOverrides,
+        System.Threading.CancellationToken cancellationToken = default);
 }
 
 /// <summary>
