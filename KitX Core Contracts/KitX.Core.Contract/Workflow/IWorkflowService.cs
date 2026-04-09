@@ -119,6 +119,12 @@ public interface IBlockScriptService
     BlockScriptValidationResult ValidateBlockScript(string sourceCode);
 
     /// <summary>
+    /// Parses constants from a BlockScript source's #ConstBlock section.
+    /// Only returns variables that have initial values (DefaultValue != null).
+    /// </summary>
+    List<VariableConstant> ParseConstantsFromBlockScript(string sourceCode);
+
+    /// <summary>
     /// Executes a block script
     /// </summary>
     Task<BlockScriptExecutionResult> ExecuteBlockScriptAsync(
