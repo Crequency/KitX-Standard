@@ -78,6 +78,11 @@ public interface IPluginServer
     int? Port { get; }
 
     /// <summary>
+    /// Gets the list of currently connected plugins
+    /// </summary>
+    IReadOnlyList<IPluginConnector> Connections { get; }
+
+    /// <summary>
     /// Starts the plugin server
     /// </summary>
     /// <returns>The server instance</returns>
