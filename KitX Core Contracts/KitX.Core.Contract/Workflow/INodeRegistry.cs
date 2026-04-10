@@ -25,4 +25,14 @@ public interface INodeRegistry
     /// Returns all registered node types.
     /// </summary>
     IReadOnlySet<BlueprintNodeType> RegisteredTypes { get; }
+
+    /// <summary>
+    /// Creates a <see cref="BuiltinFunctionNode"/> pre-configured from an
+    /// <see cref="IBuiltinFunctionDefinition"/>. The node's pins, dimensions,
+    /// and display name are all driven by the definition.
+    /// </summary>
+    /// <param name="functionName">The built-in function name (must be registered in BuiltinFunctionRegistry)</param>
+    /// <returns>A fully configured BuiltinFunctionNode</returns>
+    /// <exception cref="ArgumentException">Thrown when the function name is not registered</exception>
+    BlueprintNode CreateBuiltinFunctionNode(string functionName);
 }
