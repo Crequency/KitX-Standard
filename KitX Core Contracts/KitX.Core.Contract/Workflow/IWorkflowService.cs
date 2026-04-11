@@ -178,19 +178,19 @@ public interface IWorkflowCase
     string Id { get; }
 
     /// <summary>
-    /// Gets the workflow name
+    /// Gets or sets the workflow name
     /// </summary>
-    string Name { get; }
+    string Name { get; set; }
 
     /// <summary>
-    /// Gets the workflow description
+    /// Gets or sets the workflow description
     /// </summary>
-    string Description { get; }
+    string Description { get; set; }
 
     /// <summary>
-    /// Gets the icon path
+    /// Gets or sets the author name
     /// </summary>
-    string IconPath { get; }
+    string Author { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the workflow is running
@@ -201,4 +201,19 @@ public interface IWorkflowCase
     /// Gets or sets the script file path
     /// </summary>
     string? ScriptPath { get; set; }
+
+    /// <summary>
+    /// Gets the creation time
+    /// </summary>
+    DateTime CreatedTime { get; }
+
+    /// <summary>
+    /// Gets or sets the last modified time
+    /// </summary>
+    DateTime LastModifiedTime { get; set; }
+
+    /// <summary>
+    /// Gets or sets the trigger type (e.g., "Manual", "Scheduled", "Event")
+    /// </summary>
+    string TriggerType { get; set; }
 }

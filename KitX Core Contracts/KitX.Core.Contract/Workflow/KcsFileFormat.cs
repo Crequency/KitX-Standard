@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -8,6 +9,41 @@ namespace KitX.Core.Contract.Workflow;
 /// </summary>
 public class KcsFileFormat
 {
+    /// <summary>
+    /// 工作流唯一标识符
+    /// </summary>
+    public string Id { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 工作流名称
+    /// </summary>
+    public string Name { get; set; } = "Untitled Workflow";
+
+    /// <summary>
+    /// 工作流描述
+    /// </summary>
+    public string Description { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 作者名称
+    /// </summary>
+    public string Author { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 创建时间
+    /// </summary>
+    public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// 最后修改时间
+    /// </summary>
+    public DateTime LastModifiedTime { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// 触发类型（"Manual", "Scheduled", "Event" 等）
+    /// </summary>
+    public string TriggerType { get; set; } = "Manual";
+
     /// <summary>
     /// 主程序代码
     /// </summary>
