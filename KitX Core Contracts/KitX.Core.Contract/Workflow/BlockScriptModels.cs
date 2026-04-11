@@ -66,7 +66,7 @@ public class BlockDefinition
 
     /// <summary>
     /// Name of the next block to execute when this block ends naturally
-    /// (i.e., not ended by Branch/Loop/LoopBodyEnd)
+    /// (i.e., not ended by Branch/Loop/ToLoopCond)
     /// </summary>
     public string? NextBlockName { get; set; }
 
@@ -166,9 +166,9 @@ public enum FlowControlType
     Break,
 
     /// <summary>
-    /// Loop body end - marks the end of a loop body and returns to loop condition
+    /// To loop condition - marks the end of a loop body and returns to loop condition
     /// </summary>
-    LoopBodyEnd
+    ToLoopCond
 }
 
 /// <summary>
@@ -198,9 +198,9 @@ public class FlowControlStatement : BlockStatement
     public string FalseBlockName { get; set; } = string.Empty;
 
     /// <summary>
-    /// For LoopBodyEnd: the block name containing the Loop statement to return to
+    /// For ToLoopCond: the block name containing the Loop statement to return to
     /// </summary>
-    public string? LoopBodyEndReturnTo { get; set; }
+    public string? ToLoopCondReturnTo { get; set; }
 
     /// <summary>
     /// Regenerates SourceCode from current field values.
@@ -212,9 +212,9 @@ public class FlowControlStatement : BlockStatement
         {
             FlowControlType.Branch => $"NextBlock = Branch({ConditionExpression}, \"{TrueBlockName}\", \"{FalseBlockName}\");",
             FlowControlType.Loop => $"NextBlock = Loop({ConditionExpression}, \"{TrueBlockName}\", \"{FalseBlockName}\");",
-            FlowControlType.LoopBodyEnd => LoopBodyEndReturnTo != null
-                ? $"NextBlock = LoopBodyEnd(\"{LoopBodyEndReturnTo}\");"
-                : "LoopBodyEnd();",
+            FlowControlType.ToLoopCond => ToLoopCondReturnTo != null
+                ? $"NextBlock = ToLoopCond(\"{ToLoopCondReturnTo}\");"
+                : "ToLoopCond();",
             FlowControlType.Break => "Break();",
             _ => SourceCode
         };

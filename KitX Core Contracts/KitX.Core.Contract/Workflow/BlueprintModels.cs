@@ -757,7 +757,7 @@ public class BlueprintBlockScope
 
     /// <summary>
     /// Name of the next block to execute when this block ends naturally
-    /// (i.e., not ended by Branch/Loop/LoopBodyEnd). Null if the block ends
+    /// (i.e., not ended by Branch/Loop/ToLoopCond). Null if the block ends
     /// with a control-flow statement or is terminal.
     /// </summary>
     public string? NextBlockName { get; set; }
