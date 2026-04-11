@@ -127,7 +127,7 @@ namespace Kscript.CSharp.Utils
             clone._command = new Command
             {
                 FunctionName = _command.FunctionName,
-                FunctionArgs = _command.FunctionArgs?.ToList()
+                FunctionArgs = _command.FunctionArgs?.ToList() ?? new()
             };
             clone._request = new Request
             {

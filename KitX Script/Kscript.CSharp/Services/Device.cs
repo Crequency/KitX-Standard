@@ -22,10 +22,10 @@ namespace Kscript.CSharp.Services
         public async Task<IPlugin> RequestPlugin(string Name)
         {
             var plugins = await GetPluginList();
-            var pluginInfo = plugins.FirstOrDefault(p => 
+            var pluginInfo = plugins.FirstOrDefault(p =>
                 p.Name.Equals(Name, StringComparison.OrdinalIgnoreCase));
-            
-            return pluginInfo != null ? await CreatePluginInstance(pluginInfo) : null;
+
+            return pluginInfo != null ? await CreatePluginInstance(pluginInfo) : null!;
         }
 
         public async Task<IEnumerable<PluginInfo>> GetPluginList()
@@ -50,15 +50,15 @@ namespace Kscript.CSharp.Services
 
                             // With the following code
                             var plugins = JsonSerializer.Deserialize<List<PluginInfo>>(content);
-                            
+
                             // Update cache
-                            _pluginCache = plugins.ToDictionary(
+                            _pluginCache = plugins!.ToDictionary(
                                 p => p.Name,
                                 p => p,
                                 StringComparer.OrdinalIgnoreCase
                             );
 
-                            tcs.SetResult(plugins);
+                            tcs.SetResult(plugins!);
                             return content;
                         }),
                         matchCommand: content =>
@@ -72,15 +72,15 @@ namespace Kscript.CSharp.Services
                             {
                                 var pluginListJson = content.Substring("PluginList:".Length);
                                 var plugins = JsonSerializer.Deserialize<List<PluginInfo>>(pluginListJson);
-                                
+
                                 // Update cache
-                                _pluginCache = plugins.ToDictionary(
+                                _pluginCache = plugins!.ToDictionary(
                                     p => p.Name,
                                     p => p,
                                     StringComparer.OrdinalIgnoreCase
                                 );
 
-                                tcs.SetResult(plugins);
+                                tcs.SetResult(plugins!);
                             }
                         }
                     );

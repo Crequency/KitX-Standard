@@ -20,7 +20,7 @@ public class CollectibleAssemblyLoadContext : AssemblyLoadContext
     protected override Assembly Load(AssemblyName assemblyName)
     {
         // 让默认上下文处理核心程序集加载
-        return null;
+        return null!;
     }
 }
 

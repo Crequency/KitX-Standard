@@ -37,7 +37,7 @@ namespace Kscript.CSharp.Utils
                             result = commandHandler(command);
                         }
                     );
-                    return result;
+                    return result!;
                 }
                 catch (Exception ex)
                 {

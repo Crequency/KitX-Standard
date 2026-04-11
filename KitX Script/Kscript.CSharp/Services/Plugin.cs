@@ -19,10 +19,10 @@ namespace Kscript.CSharp.Services
             _connector = connector ?? Connector.Instance;
         }
 
-        public async Task<IFunction> RequestFunction(string Name)
+        public async Task<IFunction?> RequestFunction(string Name)
         {
             var functions = await GetFunctionList();
-            var function = functions.FirstOrDefault(f => 
+            var function = functions.FirstOrDefault(f =>
                 f.Info.Name.Equals(Name, StringComparison.OrdinalIgnoreCase));
             return function;
         }
@@ -69,7 +69,7 @@ namespace Kscript.CSharp.Services
                         {
                             var returnType = GetFunctionReturnType(functionName);
                             var result = ParseFunctionResponse(content, returnType);
-                            tcs.SetResult(result);
+                            tcs.SetResult(result!);
                             return content;
                         }),
                         matchCommand: content =>
@@ -84,7 +84,7 @@ namespace Kscript.CSharp.Services
                                 var resultJson = content.Substring("Result:".Length);
                                 var returnType = GetFunctionReturnType(functionName);
                                 var result = ParseFunctionResponse(resultJson, returnType);
-                                tcs.SetResult(result);
+                                tcs.SetResult(result!);
                             }
                         }
                     );
@@ -140,7 +140,7 @@ namespace Kscript.CSharp.Services
             }
         }
 
-        private object ParseFunctionResponse(string content, Type returnType)
+        private object? ParseFunctionResponse(string content, Type returnType)
         {
             if (string.IsNullOrEmpty(content))
                 return null;

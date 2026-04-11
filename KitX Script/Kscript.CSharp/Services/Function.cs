@@ -48,14 +48,14 @@ namespace Kscript.CSharp.Services
                         {
                             if (string.IsNullOrEmpty(content))
                             {
-                                tcs.SetResult(null);
+                                tcs.SetResult(null!);
                                 return content;
                             }
 
                             // Parse response based on return type
                             var returnType = GetReturnType();
                             var result = ParseResponse(content, returnType);
-                            tcs.SetResult(result);
+                            tcs.SetResult(result!);
                             return content;
                         }),
                         matchCommand: content =>
@@ -70,7 +70,7 @@ namespace Kscript.CSharp.Services
                                 var resultJson = content.Substring("Result:".Length);
                                 var returnType = GetReturnType();
                                 var result = ParseResponse(resultJson, returnType);
-                                tcs.SetResult(result);
+                                tcs.SetResult(result!);
                             }
                         }
                     );
@@ -120,7 +120,7 @@ namespace Kscript.CSharp.Services
             }
         }
 
-        private object ParseResponse(string content, Type returnType)
+        private object? ParseResponse(string content, Type returnType)
         {
             if (string.IsNullOrEmpty(content))
                 return null;

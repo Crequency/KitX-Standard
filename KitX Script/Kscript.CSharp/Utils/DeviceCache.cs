@@ -10,7 +10,7 @@ namespace Kscript.CSharp.Utils
     {
         private class CacheEntry<T>
         {
-            public T Value { get; set; }
+            public required T Value { get; set; }
             public DateTime Expiration { get; set; }
             public DateTime CreatedAt { get; } = DateTime.UtcNow;
             private int _accessCount;
@@ -72,8 +72,7 @@ namespace Kscript.CSharp.Utils
         /// </summary>
         public IEnumerable<DeviceInfo>? Get(string key)
         {
-            var entry = _cache.GetOrAdd(key, _ => null);
-            if (entry == null || entry.IsExpired)
+            if (!_cache.TryGetValue(key, out var entry) || entry.IsExpired)
             {
                 _cache.TryRemove(key, out _);
                 return null;
@@ -88,8 +87,7 @@ namespace Kscript.CSharp.Utils
         /// </summary>
         public bool IsValid(string key)
         {
-            var entry = _cache.GetOrAdd(key, _ => null);
-            return entry != null && !entry.IsExpired;
+            return _cache.TryGetValue(key, out var entry) && !entry.IsExpired;
         }
 
         /// <summary>
