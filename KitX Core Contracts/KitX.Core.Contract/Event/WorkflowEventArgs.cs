@@ -39,9 +39,22 @@ public class WorkflowSavedEventArgs : EventArgs
     /// </summary>
     public string WorkflowName { get; }
 
-    public WorkflowSavedEventArgs(string workflowId, string workflowName)
+    /// <summary>
+    /// The workflow description at time of save
+    /// </summary>
+    public string Description { get; }
+
+    /// <summary>
+    /// The workflow author at time of save
+    /// </summary>
+    public string Author { get; }
+
+    public WorkflowSavedEventArgs(string workflowId, string workflowName,
+        string description = "", string author = "")
     {
         WorkflowId = workflowId;
         WorkflowName = workflowName;
+        Description = description;
+        Author = author;
     }
 }
