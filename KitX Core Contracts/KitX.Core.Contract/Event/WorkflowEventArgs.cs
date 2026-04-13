@@ -58,3 +58,31 @@ public class WorkflowSavedEventArgs : EventArgs
         Author = author;
     }
 }
+
+/// <summary>
+/// Event arguments for workflow execution result events
+/// </summary>
+public class WorkflowExecutionResultEventArgs : EventArgs
+{
+    /// <summary>
+    /// The workflow ID that was executed
+    /// </summary>
+    public string WorkflowId { get; }
+
+    /// <summary>
+    /// Whether the execution succeeded
+    /// </summary>
+    public bool IsSuccess { get; }
+
+    /// <summary>
+    /// Error message if execution failed
+    /// </summary>
+    public string? ErrorMessage { get; }
+
+    public WorkflowExecutionResultEventArgs(string workflowId, bool isSuccess, string? errorMessage = null)
+    {
+        WorkflowId = workflowId;
+        IsSuccess = isSuccess;
+        ErrorMessage = errorMessage;
+    }
+}

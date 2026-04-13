@@ -198,6 +198,16 @@ public interface IWorkflowCase
     bool IsRunning { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the workflow is in an error state
+    /// </summary>
+    bool IsError { get; set; }
+
+    /// <summary>
+    /// Gets or sets the error message if the workflow is in an error state
+    /// </summary>
+    string? ErrorMessage { get; set; }
+
+    /// <summary>
     /// Gets or sets the script file path
     /// </summary>
     string? ScriptPath { get; set; }
@@ -213,7 +223,12 @@ public interface IWorkflowCase
     DateTime LastModifiedTime { get; set; }
 
     /// <summary>
-    /// Gets or sets the trigger type (e.g., "Manual", "Scheduled", "Event")
+    /// Gets or sets the trigger type (e.g., "Manual", "PluginEvent")
     /// </summary>
     string TriggerType { get; set; }
+
+    /// <summary>
+    /// Gets or sets the trigger configuration
+    /// </summary>
+    TriggerConfig? TriggerConfig { get; set; }
 }

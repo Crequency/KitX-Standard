@@ -40,9 +40,14 @@ public class KcsFileFormat
     public DateTime LastModifiedTime { get; set; } = DateTime.UtcNow;
 
     /// <summary>
-    /// 触发类型（"Manual", "Scheduled", "Event" 等）
+    /// 触发类型（"Manual", "PluginEvent" 等）
     /// </summary>
     public string TriggerType { get; set; } = "Manual";
+
+    /// <summary>
+    /// 触发器配置
+    /// </summary>
+    public TriggerConfig? TriggerConfig { get; set; }
 
     /// <summary>
     /// 主程序代码
