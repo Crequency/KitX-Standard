@@ -165,6 +165,14 @@ public interface IBlockScriptService
 public interface IWorkflowService : IWorkflowManagementService, IScriptExecutionService,
     IWorkflowPluginService, IBlockScriptService
 {
+    /// <summary>
+    /// Compiles a workflow's BlockScript into a persisted assembly on disk.
+    /// The compiled assembly is saved under <c>Data/CompiledScripts/{workflowId}/</c>
+    /// and will be reused on subsequent runs instead of recompiling.
+    /// </summary>
+    /// <param name="workflowId">The workflow ID to compile and persist.</param>
+    /// <returns>True if compilation and persistence succeeded.</returns>
+    Task<bool> CompileAndPersistWorkflowAsync(string workflowId);
 }
 
 /// <summary>

@@ -60,4 +60,11 @@ public interface IWorkflowStorageService
     /// <param name="workflowId">Workflow ID</param>
     /// <returns>Full file path</returns>
     string GetWorkflowFilePath(string workflowId);
+
+    /// <summary>
+    /// Preloads all persisted compiled scripts for discovered workflows from disk
+    /// into the in-memory cache. Called at startup to enable fast first-run execution.
+    /// </summary>
+    /// <returns>Number of scripts successfully loaded.</returns>
+    Task<int> PreloadCompiledScriptsAsync();
 }
