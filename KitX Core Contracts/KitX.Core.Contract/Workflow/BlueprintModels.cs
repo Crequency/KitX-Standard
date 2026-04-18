@@ -510,6 +510,12 @@ public class CallNode : BlueprintNode
     /// </summary>
     public string FunctionName { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Target device name for cross-device calls.
+    /// If null or empty, call is routed locally via PluginCall.
+    /// </summary>
+    public string? TargetDevice { get; set; }
+
     public CallNode()
     {
         NodeType = BlueprintNodeType.Call;
@@ -528,7 +534,10 @@ public class CallNode : BlueprintNode
     );
 
     public override string GetDisplayTitle()
-        => string.IsNullOrEmpty(PluginName) ? $"Call: {FunctionName}" : $"Call: {PluginName}.{FunctionName}";
+    {
+        var baseTitle = string.IsNullOrEmpty(PluginName) ? $"Call: {FunctionName}" : $"Call: {PluginName}.{FunctionName}";
+        return string.IsNullOrEmpty(TargetDevice) ? baseTitle : $"{baseTitle} @ {TargetDevice}";
+    }
 }
 
 /// <summary>

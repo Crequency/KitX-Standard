@@ -34,6 +34,11 @@ public class PluginCallInfo
     /// </summary>
     public string[] ParameterNames { get; set; } = Array.Empty<string>();
 
+    /// <summary>
+    /// 目标设备名称（远程调用时使用）。如果为空或 null，则为本地调用。
+    /// </summary>
+    public string? TargetDevice { get; set; }
+
     public PluginCallInfo()
     {
     }
