@@ -6,8 +6,8 @@ namespace KitX.Core.Contract.Configuration;
 public interface IPagesConf
 {
     IHomePageConf Home { get; set; }
-    IDevicePageConf Device { get; set; }
-    IMarketPageConf Market { get; set; }
+    object? Device { get; set; }
+    object? Market { get; set; }
     ISettingsPageConf Settings { get; set; }
 }
 
@@ -21,16 +21,6 @@ public interface IHomePageConf
     bool IsNavigationViewPaneOpened { get; set; }
     bool UseAreaExpanded { get; set; }
 }
-
-/// <summary>
-/// Device page configuration
-/// </summary>
-public interface IDevicePageConf { }
-
-/// <summary>
-/// Market page configuration
-/// </summary>
-public interface IMarketPageConf { }
 
 /// <summary>
 /// Settings page configuration

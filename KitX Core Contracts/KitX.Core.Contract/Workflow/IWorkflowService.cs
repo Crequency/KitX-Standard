@@ -34,6 +34,13 @@ public interface IWorkflowManagementService
     /// Stops a workflow
     /// </summary>
     Task<bool> StopWorkflowAsync(string workflowId);
+
+    /// <summary>
+    /// Compiles a workflow's BlockScript into a persisted assembly on disk.
+    /// </summary>
+    /// <param name="workflowId">The workflow ID to compile and persist.</param>
+    /// <returns>True if compilation and persistence succeeded.</returns>
+    Task<bool> CompileAndPersistWorkflowAsync(string workflowId);
 }
 
 /// <summary>
@@ -157,22 +164,21 @@ public interface IBlockScriptService
         List<HelperFunction> helperFunctions,
         Dictionary<string, object?>? constantOverrides,
         System.Threading.CancellationToken cancellationToken = default);
-}
 
-/// <summary>
-/// Workflow service interface - composite interface for backward compatibility
-/// </summary>
-public interface IWorkflowService : IWorkflowManagementService, IScriptExecutionService,
-    IWorkflowPluginService, IBlockScriptService
-{
     /// <summary>
-    /// Compiles a workflow's BlockScript into a persisted assembly on disk.
-    /// The compiled assembly is saved under <c>Data/CompiledScripts/{workflowId}/</c>
-    /// and will be reused on subsequent runs instead of recompiling.
+    /// Compiles a BlockScript and persists the compiled assembly to disk.
     /// </summary>
-    /// <param name="workflowId">The workflow ID to compile and persist.</param>
+    /// <param name="script">The parsed BlockScript to compile.</param>
+    /// <param name="workflowId">The workflow ID for assembly naming.</param>
     /// <returns>True if compilation and persistence succeeded.</returns>
-    Task<bool> CompileAndPersistWorkflowAsync(string workflowId);
+    Task<bool> CompileAndPersistAsync(BlockScript script, string workflowId);
+
+    /// <summary>
+    /// Preloads all persisted compiled scripts for a workflow from disk.
+    /// </summary>
+    /// <param name="workflowId">Workflow ID to preload scripts for.</param>
+    /// <returns>Number of scripts loaded from disk.</returns>
+    int PreloadCompiledScripts(string workflowId);
 }
 
 /// <summary>

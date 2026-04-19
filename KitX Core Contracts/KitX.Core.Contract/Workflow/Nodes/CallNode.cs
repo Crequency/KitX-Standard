@@ -1,0 +1,46 @@
+namespace KitX.Core.Contract.Workflow;
+
+/// <summary>
+/// Call node - plugin function call
+/// </summary>
+public class CallNode : BlueprintNode
+{
+    /// <summary>
+    /// Plugin name
+    /// </summary>
+    public string PluginName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Function name
+    /// </summary>
+    public string FunctionName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Target device name for cross-device calls.
+    /// If null or empty, call is routed locally via PluginCall.
+    /// </summary>
+    public string? TargetDevice { get; set; }
+
+    public CallNode()
+    {
+        NodeType = BlueprintNodeType.Call;
+        Name = "Call";
+        InitializePinsFromDescriptor();
+    }
+
+    public override NodeDescriptor GetDescriptor() => new(
+        Width: 140, Height: 60,
+        InputPins: [new PinDescriptor("Exec", PinType.Execution, 20)],
+        OutputPins: [
+            new PinDescriptor("Exec", PinType.Execution, 20),
+            new PinDescriptor("Return", PinType.Any, 40)
+        ],
+        DisplayName: "Call"
+    );
+
+    public override string GetDisplayTitle()
+    {
+        var baseTitle = string.IsNullOrEmpty(PluginName) ? $"Call: {FunctionName}" : $"Call: {PluginName}.{FunctionName}";
+        return string.IsNullOrEmpty(TargetDevice) ? baseTitle : $"{baseTitle} @ {TargetDevice}";
+    }
+}

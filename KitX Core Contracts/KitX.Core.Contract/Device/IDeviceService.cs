@@ -143,6 +143,11 @@ public interface IDevicesOrganizer
     /// Event raised when a device is discovered
     /// </summary>
     event EventHandler<DeviceDiscoveredEventArgs>? DeviceDiscovered;
+
+    /// <summary>
+    /// Event raised when a device goes offline
+    /// </summary>
+    event EventHandler<DeviceOfflineEventArgs>? DeviceOffline;
 }
 
 /// <summary>
