@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace KitX.Core.Contract.Workflow;
 
 /// <summary>
@@ -20,6 +22,13 @@ public class CallNode : BlueprintNode
     /// If null or empty, call is routed locally via PluginCall.
     /// </summary>
     public string? TargetDevice { get; set; }
+
+    /// <summary>
+    /// Extra arguments beyond plugin name, method name, and target device.
+    /// Used by PluginCallWithTarget and similar functions with variable arguments.
+    /// Stored as raw argument expressions (e.g., "cityId", "__pubVar1").
+    /// </summary>
+    public List<string> ExtraArguments { get; set; } = new();
 
     public CallNode()
     {
