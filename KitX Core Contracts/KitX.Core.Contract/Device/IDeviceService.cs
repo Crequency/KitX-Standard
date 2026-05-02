@@ -126,6 +126,26 @@ public interface IDeviceServer
     /// Stops the device server
     /// </summary>
     void Stop();
+
+    /// <summary>
+    /// Checks if a device is signed in
+    /// </summary>
+    /// <param name="locator">The device locator</param>
+    /// <returns>True if the device is signed in</returns>
+    bool IsDeviceSignedIn(KitX.Shared.CSharp.Device.DeviceLocator locator);
+
+    /// <summary>
+    /// Gets the signed device token for a device locator
+    /// </summary>
+    /// <param name="locator">The device locator</param>
+    /// <returns>The token or null if not found</returns>
+    string? GetDeviceToken(KitX.Shared.CSharp.Device.DeviceLocator locator);
+
+    /// <summary>
+    /// Gets all signed-in device locators
+    /// </summary>
+    /// <returns>Read-only list of signed-in device locators</returns>
+    System.Collections.Generic.IReadOnlyList<KitX.Shared.CSharp.Device.DeviceLocator> GetSignedInDevices();
 }
 
 /// <summary>

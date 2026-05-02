@@ -12,7 +12,7 @@ public interface IPluginConnector
     /// <summary>
     /// Gets the connection ID
     /// </summary>
-    string ConnectionId { get; }
+    string? ConnectionId { get; }
 
     /// <summary>
     /// Gets the plugin info

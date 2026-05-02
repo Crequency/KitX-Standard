@@ -18,7 +18,7 @@ public interface IPluginServer
     /// <summary>
     /// Gets the list of currently connected plugins
     /// </summary>
-    IReadOnlyList<IPluginConnector> Connections { get; }
+    IReadOnlyList<IPluginConnection> Connections { get; }
 
     /// <summary>
     /// Starts the plugin server
@@ -39,9 +39,31 @@ public interface IPluginServer
     IPluginConnector? FindConnector(PluginInfo pluginInfo);
 
     /// <summary>
+    /// Finds a connection by connection ID
+    /// </summary>
+    /// <param name="connectionId">The connection ID</param>
+    /// <returns>The plugin connection or null if not found</returns>
+    IPluginConnection? FindConnection(string connectionId);
+
+    /// <summary>
     /// Event raised when server port changes
     /// </summary>
     event EventHandler<int>? PortChanged;
+
+    /// <summary>
+    /// Event raised when a plugin connects
+    /// </summary>
+    event EventHandler<PluginConnectedEventArgs>? PluginConnected;
+
+    /// <summary>
+    /// Event raised when a plugin disconnects
+    /// </summary>
+    event EventHandler<PluginDisconnectedEventArgs>? PluginDisconnected;
+
+    /// <summary>
+    /// Event raised when a plugin message is received
+    /// </summary>
+    event EventHandler<PluginMessageReceivedEventArgs>? PluginMessageReceived;
 
     /// <summary>
     /// Event raised when a plugin registers with the server
@@ -52,4 +74,9 @@ public interface IPluginServer
     /// Event raised when a plugin unregisters/disconnects from the server
     /// </summary>
     event EventHandler<PluginUnregisteredEventArgs>? PluginUnregistered;
+
+    /// <summary>
+    /// Event raised when a plugin sends a response (has RequestId)
+    /// </summary>
+    event EventHandler<PluginResponseEventArgs>? PluginResponse;
 }
