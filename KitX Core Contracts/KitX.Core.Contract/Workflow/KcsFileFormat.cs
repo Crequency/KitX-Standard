@@ -153,22 +153,6 @@ public class VariableConstant
 }
 
 /// <summary>
-/// 主程序代码分析结果
-/// </summary>
-public class MainProgramAnalysisResult
-{
-    /// <summary>
-    /// 是否有效
-    /// </summary>
-    public bool IsValid { get; set; } = true;
-
-    /// <summary>
-    /// 禁止原因
-    /// </summary>
-    public string ForbiddenReason { get; set; } = string.Empty;
-}
-
-/// <summary>
 /// KCS文件服务接口 - 仅负责KCS文件的读写
 /// </summary>
 public interface IKcsFileService
@@ -189,14 +173,5 @@ public interface IKcsFileService
 }
 
 /// <summary>
-/// 主程序代码分析器接口
+/// KCS 文件服务接口
 /// </summary>
-public interface IMainProgramAnalyzer
-{
-    /// <summary>
-    /// 分析主程序代码
-    /// </summary>
-    /// <param name="code">要分析的代码</param>
-    /// <returns>分析结果</returns>
-    MainProgramAnalysisResult Analyze(string code);
-}

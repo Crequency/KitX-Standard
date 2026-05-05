@@ -44,37 +44,6 @@ public interface IWorkflowManagementService
 }
 
 /// <summary>
-/// Script execution interface
-/// </summary>
-public interface IScriptExecutionService
-{
-    /// <summary>
-    /// Executes a workflow script
-    /// </summary>
-    Task<object?> ExecuteScriptAsync(string script, Dictionary<string, object>? parameters = null);
-
-    /// <summary>
-    /// Executes workflow script codes with plugin dependencies
-    /// </summary>
-    Task<string?> ExecuteCodesAsync(
-        string code,
-        List<PluginInfo>? requiredPlugins = null,
-        bool includeTimestamp = true,
-        System.Threading.CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Executes KCS codes
-    /// </summary>
-    Task<string?> ExecuteKcsCodesAsync(
-        string mainCode,
-        List<HelperFunction> helperFunctions,
-        List<VariableConstant> constants,
-        List<PluginInfo>? requiredPlugins = null,
-        bool includeTimestamp = true,
-        System.Threading.CancellationToken cancellationToken = default);
-}
-
-/// <summary>
 /// Plugin service interface for workflow constant and helper function handling
 /// </summary>
 public interface IWorkflowPluginService
