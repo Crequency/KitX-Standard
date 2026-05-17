@@ -49,6 +49,12 @@ public interface IBlockScriptExecutor
     /// Validates a block script
     /// </summary>
     BlockScriptValidationResult Validate(BlockScript script);
+
+    /// <summary>
+    /// Sets an optional debug controller for interactive execution (breakpoints, step, slow).
+    /// Pass null to disable debug mode.
+    /// </summary>
+    void SetDebugger(IBlueprintDebugController? debugger);
 }
 
 /// <summary>

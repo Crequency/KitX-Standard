@@ -36,4 +36,10 @@ public class BlockScriptExecutionResult
     /// Execution time in milliseconds
     /// </summary>
     public long ExecutionTimeMs { get; set; }
+
+    /// <summary>
+    /// Debug mapping: CFG statementId → Blueprint nodeId, for highlighting during debug.
+    /// Populated when executing with a debugger attached.
+    /// </summary>
+    public Dictionary<string, string>? DebugNodeMapping { get; set; }
 }

@@ -21,9 +21,19 @@ public interface INodeExportHelper
     string GetInputArgs(BlueprintNode node);
 
     /// <summary>
-/// The blueprint being converted.
-/// </summary>
+    /// The blueprint being converted.
+    /// </summary>
     Blueprint Blueprint { get; }
+
+    /// <summary>
+    /// Returns the PubVar name assigned to the given output pin, or null if no data connection exists.
+    /// </summary>
+    string? GetOutputPubVar(BlueprintNode node, string pinName);
+
+    /// <summary>
+    /// Returns true if the given output pin is consumed by at least one data connection.
+    /// </summary>
+    bool IsOutputConsumed(BlueprintNode node, string pinName);
 }
 
 /// <summary>

@@ -49,6 +49,12 @@ public class BlockScript
     public string FullSourceCode { get; set; } = string.Empty;
 
     /// <summary>
+    /// Debug mapping from CFG statement IDs to Blueprint node IDs.
+    /// Populated during BP→BS conversion for use by the debug execution pipeline.
+    /// </summary>
+    public Dictionary<string, string>? DebugNodeMapping { get; set; }
+
+    /// <summary>
     /// Helper functions to be made available in script execution context
     /// </summary>
     public List<HelperFunction> HelperFunctions { get; set; } = [];

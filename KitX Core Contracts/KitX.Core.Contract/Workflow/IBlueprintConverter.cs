@@ -76,4 +76,12 @@ public interface IBlueprintService
     /// <param name="blueprint">Blueprint to execute</param>
     /// <returns>Execution result</returns>
     Task<BlockScriptExecutionResult> ExecuteBlueprintAsync(Blueprint blueprint);
+
+    /// <summary>
+    /// Build a mapping from CFG statement IDs to Blueprint node IDs for debug highlighting.
+    /// Key = statementId (also equals BlueprintNode.Id), Value = BlueprintNode.Id
+    /// </summary>
+    /// <param name="blueprint">Blueprint to analyze</param>
+    /// <returns>StatementId → NodeId mapping, or empty if conversion failed</returns>
+    Dictionary<string, string> GetDebugNodeMapping(Blueprint blueprint);
 }
