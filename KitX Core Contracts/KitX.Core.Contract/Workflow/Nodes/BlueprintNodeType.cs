@@ -17,21 +17,6 @@ public enum BlueprintNodeType
     PluginTrigger,
 
     /// <summary>
-    /// Conditional branch node
-    /// </summary>
-    Branch,
-
-    /// <summary>
-    /// Loop node
-    /// </summary>
-    Loop,
-
-    /// <summary>
-    /// Break from loop node
-    /// </summary>
-    Break,
-
-    /// <summary>
     /// Constant value node
     /// </summary>
     Const,
@@ -47,26 +32,6 @@ public enum BlueprintNodeType
     CallHelper,
 
     /// <summary>
-    /// Get variable value node - reads a PubVar
-    /// </summary>
-    Get,
-
-    /// <summary>
-    /// Set variable value node - writes to a PubVar
-    /// </summary>
-    Set,
-
-    /// <summary>
-    /// Print output node
-    /// </summary>
-    Print,
-
-    /// <summary>
-    /// Pause execution node
-    /// </summary>
-    Pause,
-
-    /// <summary>
     /// Variable declaration node (ConstBlock variables without initial values).
     /// A floating node with no ports — users can only change the data type.
     /// </summary>
@@ -74,7 +39,7 @@ public enum BlueprintNodeType
 
     /// <summary>
     /// 通用内置函数节点。通过 <c>BuiltinFunctionNode.FunctionName</c> 区分具体函数。
-    /// 新的内置函数统一使用此类型，无需为每个函数创建专用 enum 值。
+    /// 所有内置函数统一使用此类型，无需为每个函数创建专用 enum 值。
     /// </summary>
     BuiltinFunction
 }
