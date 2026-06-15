@@ -1,5 +1,7 @@
 using System;
 using System.ComponentModel;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using KitX.Shared.CSharp.Device;
@@ -237,4 +239,27 @@ public class MainDeviceChangedEventArgs : EventArgs
     /// Gets or sets the new main device ID
     /// </summary>
     public string NewMainDeviceId { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Device HTTP client interface — sends requests to remote DevicesServer instances.
+/// Used for cross-device plugin invocation via the /Api/V1/Plugin/Invoke endpoint.
+/// (Moved to Contract so the Workflow library can depend on the abstraction without
+/// referencing KitX.Core.)
+/// </summary>
+public interface IDeviceHttpClient
+{
+    /// <summary>
+    /// Invokes a plugin method on a remote device via HTTP POST to /Api/V1/Plugin/Invoke.
+    /// </summary>
+    /// <param name="targetDevice">Target device info (contains IPv4 and DevicesServerPort)</param>
+    /// <param name="token">Valid session token for the target device</param>
+    /// <param name="request">The Request object to send</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>HTTP response from remote device, or null on network error</returns>
+    Task<HttpResponseMessage?> InvokePluginAsync(
+        DeviceInfo targetDevice,
+        string token,
+        KitX.Shared.CSharp.WebCommand.Request request,
+        CancellationToken ct = default);
 }

@@ -75,20 +75,16 @@ public interface IWorkflowPluginService
 }
 
 /// <summary>
-/// Block script service interface
+/// Block script service interface — the public surface consumed by Dashboard.
+///
+/// Only methods that take primitive/source parameters (string, List&lt;HelperFunction&gt;, ...)
+/// or return Dashboard-visible result types are kept here. Pipeline-internal methods that
+/// deal in the parsed <c>BlockScript</c> / <c>BlockScriptParseResult</c> models live on the
+/// workflow library's internal <c>IBlockScriptPipelineService</c> instead, so that those
+/// internal models need not be exposed through Contract.
 /// </summary>
 public interface IBlockScriptService
 {
-    /// <summary>
-    /// Parses a block script
-    /// </summary>
-    BlockScriptParseResult ParseBlockScript(string sourceCode);
-
-    /// <summary>
-    /// Parses a block script asynchronously
-    /// </summary>
-    Task<BlockScriptParseResult> ParseBlockScriptAsync(string sourceCode);
-
     /// <summary>
     /// Validates a block script
     /// </summary>
@@ -99,14 +95,6 @@ public interface IBlockScriptService
     /// Only returns variables that have initial values (DefaultValue != null).
     /// </summary>
     List<VariableConstant> ParseConstantsFromBlockScript(string sourceCode);
-
-    /// <summary>
-    /// Executes a block script
-    /// </summary>
-    Task<BlockScriptExecutionResult> ExecuteBlockScriptAsync(
-        BlockScript script,
-        Dictionary<string, object?>? parameters = null,
-        System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes a block script from source code
@@ -133,14 +121,6 @@ public interface IBlockScriptService
         List<HelperFunction> helperFunctions,
         Dictionary<string, object?>? constantOverrides,
         System.Threading.CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Compiles a BlockScript and persists the compiled assembly to disk.
-    /// </summary>
-    /// <param name="script">The parsed BlockScript to compile.</param>
-    /// <param name="workflowId">The workflow ID for assembly naming.</param>
-    /// <returns>True if compilation and persistence succeeded.</returns>
-    Task<bool> CompileAndPersistAsync(BlockScript script, string workflowId);
 
     /// <summary>
     /// Preloads all persisted compiled scripts for a workflow from disk.
