@@ -4,48 +4,12 @@ using System.Threading.Tasks;
 namespace KitX.Core.Contract.Workflow;
 
 /// <summary>
-/// Interface for converting BlockScript to Blueprint
-/// </summary>
-public interface IBlockScriptToBlueprintConverter
-{
-    /// <summary>
-    /// Convert BlockScript source code to Blueprint
-    /// </summary>
-    /// <param name="sourceCode">BlockScript source code</param>
-    /// <param name="helperFunctions">Helper functions available</param>
-    /// <returns>Converted Blueprint</returns>
-    Blueprint Convert(string sourceCode, List<HelperFunction>? helperFunctions = null);
-
-    /// <summary>
-    /// Convert parsed BlockScript to Blueprint
-    /// </summary>
-    /// <param name="script">Parsed BlockScript</param>
-    /// <returns>Converted Blueprint</returns>
-    Blueprint Convert(BlockScript script);
-}
-
-/// <summary>
-/// Interface for converting Blueprint to BlockScript
-/// </summary>
-public interface IBlueprintToBlockScriptConverter
-{
-    /// <summary>
-    /// Convert Blueprint to BlockScript source code
-    /// </summary>
-    /// <param name="blueprint">Blueprint to convert</param>
-    /// <returns>BlockScript source code</returns>
-    string Convert(Blueprint blueprint);
-
-    /// <summary>
-    /// Convert Blueprint to parsed BlockScript
-    /// </summary>
-    /// <param name="blueprint">Blueprint to convert</param>
-    /// <returns>Parsed BlockScript</returns>
-    BlockScript ConvertToBlockScript(Blueprint blueprint);
-}
-
-/// <summary>
-/// Interface for Blueprint service
+/// Interface for Blueprint service.
+///
+/// Kept in the public Contract surface (Dashboard consumes it). The lower-level
+/// converters (<c>IBlockScriptToBlueprintConverter</c>,
+/// <c>IBlueprintToBlockScriptConverter</c>) are internal to the workflow pipeline
+/// and live in the KitX.Workflow library.
 /// </summary>
 public interface IBlueprintService
 {
