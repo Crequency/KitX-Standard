@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace KitX.Core.Contract.Event;
 
@@ -79,10 +80,19 @@ public class WorkflowExecutionResultEventArgs : EventArgs
     /// </summary>
     public string? ErrorMessage { get; }
 
-    public WorkflowExecutionResultEventArgs(string workflowId, bool isSuccess, string? errorMessage = null)
+    /// <summary>
+    /// Lines of Print() output produced during execution (null if not captured).
+    /// Surfaced to the Debug activity log so users can see what the workflow printed
+    /// without opening the editor's output panel.
+    /// </summary>
+    public IReadOnlyList<string>? Output { get; }
+
+    public WorkflowExecutionResultEventArgs(string workflowId, bool isSuccess,
+        string? errorMessage = null, IReadOnlyList<string>? output = null)
     {
         WorkflowId = workflowId;
         IsSuccess = isSuccess;
         ErrorMessage = errorMessage;
+        Output = output;
     }
 }

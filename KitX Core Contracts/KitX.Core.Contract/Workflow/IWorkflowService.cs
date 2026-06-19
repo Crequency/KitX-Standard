@@ -31,6 +31,12 @@ public interface IWorkflowManagementService
     Task<bool> RunWorkflowAsync(string workflowId);
 
     /// <summary>
+    /// Runs a workflow and returns the full execution result including Print() output.
+    /// Use this when the caller needs the execution output (e.g. the Debug activity log).
+    /// </summary>
+    Task<WorkflowRunResult> RunWorkflowWithDetailsAsync(string workflowId);
+
+    /// <summary>
     /// Stops a workflow
     /// </summary>
     Task<bool> StopWorkflowAsync(string workflowId);
@@ -195,3 +201,11 @@ public interface IWorkflowCase
     /// </summary>
     TriggerConfig? TriggerConfig { get; set; }
 }
+
+/// <summary>
+/// Result of a workflow run, including the Print() output lines captured during execution.
+/// </summary>
+public record WorkflowRunResult(
+    bool IsSuccess,
+    string? ErrorMessage,
+    IReadOnlyList<string>? Output);
