@@ -55,11 +55,6 @@ public interface IWorkflowManagementService
 public interface IWorkflowPluginService
 {
     /// <summary>
-    /// Initializes the plugin manager
-    /// </summary>
-    void InitializePluginManager();
-
-    /// <summary>
     /// Updates the available plugins list
     /// </summary>
     void UpdateAvailablePlugins(List<PluginInfo> plugins);
@@ -190,11 +185,6 @@ public interface IWorkflowCase
     /// Gets or sets the last modified time
     /// </summary>
     DateTime LastModifiedTime { get; set; }
-
-    /// <summary>
-    /// Gets or sets the trigger type (e.g., "Manual", "PluginEvent")
-    /// </summary>
-    string TriggerType { get; set; }
 
     /// <summary>
     /// Gets or sets the trigger configuration

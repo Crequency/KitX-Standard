@@ -40,12 +40,7 @@ public class KcsFileFormat
     public DateTime LastModifiedTime { get; set; } = DateTime.UtcNow;
 
     /// <summary>
-    /// 触发类型（"Manual", "PluginEvent" 等）
-    /// </summary>
-    public string TriggerType { get; set; } = "Manual";
-
-    /// <summary>
-    /// 触发器配置
+    /// 触发器配置（包含触发类型、插件名、触发器名等结构化字段）
     /// </summary>
     public TriggerConfig? TriggerConfig { get; set; }
 
