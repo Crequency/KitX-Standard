@@ -25,4 +25,16 @@ public class BranchArm
     /// to the parent loop's condition block). Drives <c>CFGEdgeType.LoopbackToCondition</c>.
     /// </summary>
     public bool IsLoopback { get; set; }
+
+    /// <summary>
+    /// Deep copy of this arm. Centralised so the four converters (BS2CFG / CFG2BS /
+    /// BP2CFG / CFGConditionDuplicator) share one clone path instead of four
+    /// character-identical <c>Select(a => new BranchArm { ... })</c> blocks.
+    /// </summary>
+    public BranchArm Clone() => new()
+    {
+        PinName = PinName,
+        TargetBlockName = TargetBlockName,
+        IsLoopback = IsLoopback
+    };
 }
