@@ -25,7 +25,6 @@ public class VariableNode : BlueprintNode
     }
 
     public override NodeDescriptor GetDescriptor() => new(
-        Width: 120, Height: 50,
         InputPins: [],
         OutputPins: [],
         DisplayName: "Variable"

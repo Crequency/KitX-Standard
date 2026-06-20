@@ -27,7 +27,6 @@ public class BuiltinFunctionNode : BlueprintNode
     public void SetDescriptor(NodeDescriptor descriptor) => _descriptor = descriptor;
 
     public override NodeDescriptor GetDescriptor() => _descriptor ?? new(
-        Width: 120, Height: 60,
         InputPins: [],
         OutputPins: [],
         DisplayName: FunctionName

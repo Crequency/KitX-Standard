@@ -13,7 +13,6 @@ public class EntryNode : BlueprintNode
     }
 
     public override NodeDescriptor GetDescriptor() => new(
-        Width: 120, Height: 60,
         InputPins: [],
         OutputPins: [new PinDescriptor("Exec", PinType.Execution, 30)],
         DisplayName: "Entry"

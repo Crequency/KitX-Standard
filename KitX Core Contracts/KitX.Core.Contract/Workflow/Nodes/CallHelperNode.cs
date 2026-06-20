@@ -18,7 +18,6 @@ public class CallHelperNode : BlueprintNode
     }
 
     public override NodeDescriptor GetDescriptor() => new(
-        Width: 130, Height: 50,
         InputPins: [new PinDescriptor("Exec", PinType.Execution, 25)],
         OutputPins: [
             new PinDescriptor("Exec", PinType.Execution, 25),

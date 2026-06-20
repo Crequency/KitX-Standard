@@ -28,7 +28,6 @@ public class ConstNode : BlueprintNode
     }
 
     public override NodeDescriptor GetDescriptor() => new(
-        Width: 120, Height: 50,
         InputPins: [],
         OutputPins: [new PinDescriptor("Value", PinType.Any, 25)],
         DisplayName: "Const"
