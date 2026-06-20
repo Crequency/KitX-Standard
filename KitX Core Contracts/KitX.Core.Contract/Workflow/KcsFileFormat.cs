@@ -147,26 +147,3 @@ public class VariableConstant
     public string Type { get; set; } = "string";
 }
 
-/// <summary>
-/// KCS文件服务接口 - 仅负责KCS文件的读写
-/// </summary>
-public interface IKcsFileService
-{
-    /// <summary>
-    /// 加载KCS文件
-    /// </summary>
-    /// <param name="filePath">文件路径</param>
-    /// <returns>KCS文件内容</returns>
-    Task<KcsFileFormat?> LoadKcsFileAsync(string filePath);
-
-    /// <summary>
-    /// 保存KCS文件
-    /// </summary>
-    /// <param name="filePath">文件路径</param>
-    /// <param name="kcs">KCS文件内容</param>
-    Task SaveKcsFileAsync(string filePath, KcsFileFormat kcs);
-}
-
-/// <summary>
-/// KCS 文件服务接口
-/// </summary>

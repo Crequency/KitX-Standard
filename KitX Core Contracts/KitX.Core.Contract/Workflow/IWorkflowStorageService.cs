@@ -42,13 +42,6 @@ public interface IWorkflowStorageService
     Task DeleteWorkflowAsync(string workflowId);
 
     /// <summary>
-    /// Renames a workflow
-    /// </summary>
-    /// <param name="workflowId">Workflow ID</param>
-    /// <param name="newName">New name</param>
-    Task RenameWorkflowAsync(string workflowId, string newName);
-
-    /// <summary>
     /// Discovers all stored workflows by scanning the storage directory
     /// </summary>
     /// <returns>List of discovered workflow cases</returns>
@@ -60,11 +53,4 @@ public interface IWorkflowStorageService
     /// <param name="workflowId">Workflow ID</param>
     /// <returns>Full file path</returns>
     string GetWorkflowFilePath(string workflowId);
-
-    /// <summary>
-    /// Preloads all persisted compiled scripts for discovered workflows from disk
-    /// into the in-memory cache. Called at startup to enable fast first-run execution.
-    /// </summary>
-    /// <returns>Number of scripts successfully loaded.</returns>
-    Task<int> PreloadCompiledScriptsAsync();
 }

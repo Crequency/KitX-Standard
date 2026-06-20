@@ -11,21 +11,6 @@ namespace KitX.Core.Contract.Workflow;
 public interface IWorkflowManagementService
 {
     /// <summary>
-    /// Gets the workflow list
-    /// </summary>
-    IReadOnlyList<IWorkflowCase> GetWorkflows();
-
-    /// <summary>
-    /// Adds a workflow
-    /// </summary>
-    void AddWorkflow(IWorkflowCase workflow);
-
-    /// <summary>
-    /// Removes a workflow
-    /// </summary>
-    void RemoveWorkflow(string workflowId);
-
-    /// <summary>
     /// Runs a workflow
     /// </summary>
     Task<bool> RunWorkflowAsync(string workflowId);
@@ -55,24 +40,9 @@ public interface IWorkflowManagementService
 public interface IWorkflowPluginService
 {
     /// <summary>
-    /// Updates the available plugins list
-    /// </summary>
-    void UpdateAvailablePlugins(List<PluginInfo> plugins);
-
-    /// <summary>
     /// Parses constants from code
     /// </summary>
     List<VariableConstant> ParseConstantsFromCode(string code);
-
-    /// <summary>
-    /// Applies constants to code
-    /// </summary>
-    string ApplyConstantsToCode(string code, List<VariableConstant> constants);
-
-    /// <summary>
-    /// Merges helper functions into code
-    /// </summary>
-    string MergeHelperFunctions(string mainCode, List<HelperFunction> helperFunctions);
 }
 
 /// <summary>
@@ -96,14 +66,6 @@ public interface IBlockScriptService
     /// Only returns variables that have initial values (DefaultValue != null).
     /// </summary>
     List<VariableConstant> ParseConstantsFromBlockScript(string sourceCode);
-
-    /// <summary>
-    /// Executes a block script from source code
-    /// </summary>
-    Task<BlockScriptExecutionResult> ExecuteBlockScriptAsync(
-        string sourceCode,
-        Dictionary<string, object?>? parameters = null,
-        System.Threading.CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes a block script from source code with helper functions
