@@ -1,21 +1,34 @@
 namespace KitX.Core.Contract.Workflow;
 
 /// <summary>
-/// Variable node - ConstBlock variable without initial value.
-/// A floating node with no input/output ports. Users can change the data type
-/// but not the initial value. Type changes propagate to Get/Set nodes.
+/// Variable node (v5.0) — unified read/write node for all variable tiers.
+/// <para>
+/// Replaces the v4.0 Get/Set builtin function nodes: a read is a data edge leaving the
+/// <c>Value</c> output pin; a write is a data edge entering the <c>Value</c> input pin.
+/// The tap semantics (<c>0 &gt; x &gt; Print</c>) is expressed by both edges existing on
+/// the same node. See BlockScriptGrammarRule §4.4, §6.3.
+/// </para>
+/// <para>
+/// <see cref="VarKind"/> distinguishes the storage tier (Const / PubVar / BlockVar / LoopIndex),
+/// which governs mutability, scope and reset behaviour (§3.4).
+/// </para>
 /// </summary>
 public class VariableNode : BlueprintNode
 {
     /// <summary>
-    /// Variable name
+    /// Variable name.
     /// </summary>
     public string VarName { get; set; } = string.Empty;
 
     /// <summary>
-    /// Variable type (e.g., "int", "double", "string", "bool")
+    /// Variable type (e.g., "int", "double", "string", "bool").
     /// </summary>
     public string VarType { get; set; } = "int";
+
+    /// <summary>
+    /// Storage tier this variable belongs to (v5.0). Governs mutability/scope/reset.
+    /// </summary>
+    public VariableKind VarKind { get; set; } = VariableKind.PubVar;
 
     public VariableNode()
     {
@@ -24,11 +37,15 @@ public class VariableNode : BlueprintNode
         InitializePinsFromDescriptor();
     }
 
+    /// <summary>
+    /// One <c>Value</c> input pin (write/Set) and one <c>Value</c> output pin (read/Get).
+    /// Both are <c>Any</c>-typed at the node level; the connected data carries the actual type.
+    /// </summary>
     public override NodeDescriptor GetDescriptor() => new(
-        InputPins: [],
-        OutputPins: [],
+        InputPins: [new PinDescriptor("Value", PinType.Any, 25)],
+        OutputPins: [new PinDescriptor("Value", PinType.Any, 75)],
         DisplayName: "Variable"
     );
 
-    public override string GetDisplayTitle() => $"Var: {VarName}";
+    public override string GetDisplayTitle() => $"{VarKind}: {VarName}";
 }

@@ -18,6 +18,9 @@ namespace KitX.Core.Contract.Workflow;
 [JsonDerivedType(typeof(VariableNode), "Variable")]
 [JsonDerivedType(typeof(BuiltinFunctionNode), "BuiltinFunction")]
 [JsonDerivedType(typeof(PluginTriggerNode), "PluginTrigger")]
+[JsonDerivedType(typeof(BlockNode), "Block")]
+[JsonDerivedType(typeof(EntryPointNode), "EntryPoint")]
+[JsonDerivedType(typeof(ExitPointNode), "ExitPoint")]
 public abstract partial class BlueprintNode
 {
     /// <summary>
@@ -59,6 +62,13 @@ public abstract partial class BlueprintNode
     /// Whether node is selected
     /// </summary>
     public bool IsSelected { get; set; }
+
+    /// <summary>
+    /// User-facing comment attached to this node (v5.0 bidirectional comment retention).
+    /// Sourced from BS `//` comments via the anchoring rules in BlockScriptGrammarRule §9.
+    /// Nullable: null = no comment. Serialized for all subclasses via the base-class property.
+    /// </summary>
+    public string? Comment { get; set; }
 
     /// <summary>
     /// Input pins
