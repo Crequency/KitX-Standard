@@ -44,30 +44,15 @@ public class ControlFlowArms
     }
 
     /// <summary>
-    /// The ToLoopCond loopback target — the loop condition block this statement returns to.
-    /// Unified into <see cref="Arms"/>[0] (PinName="Exec", IsLoopback=true) so ToLoopCond is
-    /// treated uniformly with Branch/Loop/Switch: all control-flow targets live in Arms.
-    /// The former standalone <c>ToLoopCondReturnTo</c> field was a patch over an Arms[0]
-    /// collision that no longer exists; Loop statements no longer carry this metadata at all
-    /// (it was dead — never read for control flow, only copied and debug-printed).
-    /// </summary>
-    public string? LoopbackTarget
-    {
-        get => Arms.Count > 0 ? Arms[0].TargetBlockName : null;
-        set => SetArm(0, "Exec", value, isLoopback: true);
-    }
-
-    /// <summary>
     /// Sets the arm at <paramref name="index"/>, growing <see cref="Arms"/> with blank arms
     /// as needed. Normalises a null <paramref name="value"/> to <c>string.Empty</c> so the
     /// convenience accessors never surface null into SourceCode concatenation.
     /// </summary>
-    public void SetArm(int index, string pinName, string? value, bool isLoopback = false)
+    public void SetArm(int index, string pinName, string? value)
     {
         while (Arms.Count <= index)
             Arms.Add(new BranchArm());
         Arms[index].PinName = pinName;
         Arms[index].TargetBlockName = value ?? string.Empty;
-        Arms[index].IsLoopback = isLoopback;
     }
 }
