@@ -101,7 +101,23 @@ public class BlueprintBlockScope
     /// Whether this block scope represents the main entry block.
     /// </summary>
     public bool IsMainBlock { get; set; }
+
+    /// <summary>
+    /// v5.1: block-local variable declarations (##BlockVars).
+    /// Each entry is the complete declaration line, e.g. "int processedCount = 0".
+    /// </summary>
+    public List<BlockVarEntry> BlockVars { get; set; } = [];
+
+    /// <summary>
+    /// v5.1: true when the block uses the explicit ##BlockBody marker.
+    /// </summary>
+    public bool HasExplicitBlockBody { get; set; }
 }
+
+/// <summary>
+/// v5.1: a single block-local variable declaration carried through BP round-trip.
+/// </summary>
+public record BlockVarEntry(string Name, string? Type, string? DefaultValue);
 
 /// <summary>
 /// Blueprint document container
