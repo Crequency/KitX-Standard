@@ -77,6 +77,13 @@ public class KcsFileFormat
     /// 当 UseBlockMode=true 且此字段非空时，表示该脚本有对应的蓝图编辑状态
     /// </summary>
     public Blueprint? BlueprintData { get; set; }
+
+    /// <summary>
+    /// v5.1: CFG-based canonical data. When present, takes precedence over
+    /// <see cref="BlockScriptSource"/> and <see cref="BlueprintData"/>.
+    /// BS text and BP graph are rendered views of this data.
+    /// </summary>
+    public CfgDto? CfgData { get; set; }
 }
 
 /// <summary>
