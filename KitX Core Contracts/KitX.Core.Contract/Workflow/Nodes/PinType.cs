@@ -33,5 +33,13 @@ public enum PinType
     /// <summary>
     /// Any type pin - white
     /// </summary>
-    Any
+    Any,
+
+    /// <summary>
+    /// Structured-data pin (System.Text.Json.JsonElement: Array/Object/scalar) - blue.
+    /// The first-class type for collection/object values flowing from plugin returns and
+    /// JSON functions (Package/List-Port-And-Json-Functions-Design.md §2.1). Distinct from Any
+    /// (which is an untyped catch-all); Json declares "this is structured data".
+    /// </summary>
+    Json
 }
