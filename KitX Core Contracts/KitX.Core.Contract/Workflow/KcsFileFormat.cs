@@ -4,8 +4,36 @@ using System.Threading.Tasks;
 
 namespace KitX.Core.Contract.Workflow;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// KcsFileFormat v2 — IR as the single source of truth.
+//
+// v1 stored three redundant representations side-by-side: BS text
+// (MainProgram/BlockScriptSource), the mutable Blueprint graph (BlueprintData),
+// and the v5.1 CFG DTO (CfgData). Under the v6.0 architecture (IR-Architecture-
+// v6.0.md §2) IR is the sole truth and BS/BP are projections produced on demand
+// by BsTextLens.Project / BpGraphLens.Project. v2 collapses the three into one
+// stored IR blob (IrData) plus the pure-metadata envelope fields that are NOT
+// part of IR semantics (identity, authoring, trigger config, user constant
+// overrides).
+//
+// Dropped v1 fields      → how they are recovered
+//   MainProgram            BsTextLens.Project(ir)  (on-demand BS view)
+//   BlockScriptSource      ditto
+//   BlueprintData          BpGraphLens.Project(ir) (on-demand BP view)
+//   CfgData                replaced wholesale by IrData (IrDto v6.0)
+//   UseBlockMode           meaningless under IR-as-truth (no "mode")
+//   HelperFunctions        already carried by IrWorkflow.HelperFunctions
+//
+// Kept envelope fields (NOT derivable from IR):
+//   Id / Name / Description / Author / timestamps — workflow identity/metadata
+//   TriggerConfig                                  — deployment/runtime concern
+//   VariableConstants                              — user overrides on IrConstant
+//
+// Migration: KitX.WorkflowMigrator converts v1 → v2 (BS → parse → IR → serialize).
+// ─────────────────────────────────────────────────────────────────────────────
+
 /// <summary>
-/// KCS (KitX Code Script) 文件格式定义
+/// KCS (KitX Code Script) 文件格式定义 — v2 (IR as storage).
 /// </summary>
 public class KcsFileFormat
 {
@@ -45,45 +73,16 @@ public class KcsFileFormat
     public TriggerConfig? TriggerConfig { get; set; }
 
     /// <summary>
-    /// 主程序代码
-    /// </summary>
-    public string MainProgram { get; set; } = string.Empty;
-
-    /// <summary>
-    /// 辅助函数列表
-    /// </summary>
-    public List<HelperFunction> HelperFunctions { get; set; } = [];
-
-    /// <summary>
-    /// 可变常量及其用户修改后的值
+    /// 可变常量及其用户修改后的值。IR 的 <c>Constants</c> 存默认值，这里只存用户的覆盖值。
+    /// 加载时合并：IR 提供默认值，信封覆盖值优先。
     /// </summary>
     public Dictionary<string, object?> VariableConstants { get; set; } = [];
 
     /// <summary>
-    /// 是否使用块脚本模式
+    /// v2: 工作流的 IR 序列化形式（<c>IrSerializer.Serialize(ir)</c> 产出的 JSON 字符串）。
+    /// 这是工作流的唯一真相源——BS 文本与 BP 图都是它的投影，按需生成，不再持久化。
     /// </summary>
-    /// <remarks>
-    /// 当为 true 时，使用 BlockScriptSource 作为脚本内容
-    /// </remarks>
-    public bool UseBlockMode { get; set; } = false;
-
-    /// <summary>
-    /// 块脚本源代码（当 UseBlockMode 为 true 时使用）
-    /// </summary>
-    public string? BlockScriptSource { get; set; }
-
-    /// <summary>
-    /// 蓝图可视化数据（包含节点位置、连接关系、视图状态等）
-    /// 当 UseBlockMode=true 且此字段非空时，表示该脚本有对应的蓝图编辑状态
-    /// </summary>
-    public Blueprint? BlueprintData { get; set; }
-
-    /// <summary>
-    /// v5.1: CFG-based canonical data. When present, takes precedence over
-    /// <see cref="BlockScriptSource"/> and <see cref="BlueprintData"/>.
-    /// BS text and BP graph are rendered views of this data.
-    /// </summary>
-    public CfgDto? CfgData { get; set; }
+    public string IrData { get; set; } = "{}";
 }
 
 /// <summary>
@@ -153,4 +152,3 @@ public class VariableConstant
     /// </summary>
     public string Type { get; set; } = "string";
 }
-
