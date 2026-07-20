@@ -65,4 +65,14 @@ public interface IAppConf
     bool ShowAnnouncementWhenStart { get; set; }
     ulong RanTime { get; set; }
     int LastBreakAfterExit { get; set; }
+
+    /// <summary>
+    /// Default expand mode for blueprint nested (Block) nodes.
+    /// Values: "Embedded" (Picture-in-Picture inner editor, default) or
+    /// "SubEditor" (modal overlay with breadcrumb navigation).
+    /// Consumed by BlueprintEditorViewModel.InitializeBlockScopes when
+    /// creating BlueprintBlockNodeVM instances. Unknown values fall back
+    /// to "Embedded".
+    /// </summary>
+    string BlueprintNestedNodeExpandMode { get; set; }
 }
