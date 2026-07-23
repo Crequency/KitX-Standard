@@ -120,6 +120,33 @@ public class BlueprintBlockScope
 public record BlockVarEntry(string Name, string? Type, string? DefaultValue);
 
 /// <summary>
+/// A statement-level (data-connection subgraph) comment. Backs the KS
+/// <c>LeadingComment</c> through the BP round-trip: one KS statement maps to one
+/// data-connection subgraph, and this comment annotates that whole subgraph.
+/// <see cref="AnchorNodeId"/> is the statement's primary node (the node the exec
+/// chain enters) so the reverse translator can reattach it. <see cref="NodeIds"/>
+/// lists the subgraph's nodes for frontend box-rendering (optional).
+/// </summary>
+public class BlueprintGroupComment
+{
+    /// <summary>The comment text (may contain multiple lines joined by <c>\n</c>).</summary>
+    public string Comment { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The statement's primary node id (the node the exec chain enters — Branch/Each/
+    /// While/Switch/control node, or the last function node of a pipeline). The reverse
+    /// translator matches leading comments by this id.
+    /// </summary>
+    public string AnchorNodeId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// All node ids belonging to this statement's data-connection subgraph (for frontend
+    /// box/highlight rendering). Optional; may be empty.
+    /// </summary>
+    public List<string> NodeIds { get; set; } = [];
+}
+
+/// <summary>
 /// Blueprint document container
 /// </summary>
 public class Blueprint
@@ -184,6 +211,16 @@ public class Blueprint
     /// Empty for legacy blueprints that predate this field.
     /// </summary>
     public List<BlueprintBlockScope> BlockScopes { get; set; } = [];
+
+    /// <summary>
+    /// Statement-level (data-connection subgraph) comments. Each entry attaches a
+    /// leading comment to the set of nodes forming one KS statement's data subgraph
+    /// (one KS statement == one data-connection subgraph). <see cref="BlueprintGroupComment.AnchorNodeId"/>
+    /// is the statement's primary node (the node the exec chain enters), used by the
+    /// reverse translator to reattach the comment as a leading comment.
+    /// Empty for blueprints without preserved leading comments.
+    /// </summary>
+    public List<BlueprintGroupComment> GroupComments { get; set; } = [];
 
     /// <summary>
     /// Get node by ID
