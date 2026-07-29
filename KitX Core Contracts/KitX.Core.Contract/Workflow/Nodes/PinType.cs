@@ -41,5 +41,14 @@ public enum PinType
     /// JSON functions (Package/List-Port-And-Json-Functions-Design.md §2.1). Distinct from Any
     /// (which is an untyped catch-all); Json declares "this is structured data".
     /// </summary>
-    Json
+    Json,
+
+    /// <summary>
+    /// Dictionary pin (System.Collections.Generic.Dictionary&lt;string, object?&gt;) - grey.
+    /// The first-class mutable key-value container type for Dict values constructed in KS
+    /// (Package/Dict-Type-Design.md). Distinct from Json (which is a read-only JsonElement
+    /// view of plugin-returned data); Dict declares "this is a mutable flat map". Bridged to
+    /// Json via DictToJson/JsonToDict.
+    /// </summary>
+    Dict
 }

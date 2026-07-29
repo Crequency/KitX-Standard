@@ -19,4 +19,24 @@ namespace KitX.Core.Contract.Workflow;
 /// <item>Switch output: <c>new("", 1, PinType.Execution)</c> → "1", "2", ...</item>
 /// </list>
 /// </summary>
-public record VariadicPinSpec(string BasePinName, int StartIndex, PinType PinType);
+public record VariadicPinSpec(string BasePinName, int StartIndex, PinType PinType)
+{
+    /// <summary>
+    /// Optional pin-name prefixes for paired/multi-type variadic pin groups.
+    /// <para>
+    /// When set together with <see cref="PinTypes"/>, the variadic group grows by appending
+    /// one pin per prefix (cycling in order) per growth iteration, instead of a single pin.
+    /// This supports nodes needing alternating pin types, e.g. DictNew's
+    /// Key(String)/Value(Any) pairs: <c>PinNamePrefixes=["Key","Value"], PinTypes=[String,Any]</c>
+    /// grows "Key0","Value0","Key1","Value1",... (index from <see cref="StartIndex"/> appended
+    /// to every prefix). Null = legacy single-<see cref="PinType"/> behaviour (backward compatible).
+    /// </para>
+    /// </summary>
+    public string[]? PinNamePrefixes { get; init; }
+
+    /// <summary>
+    /// Optional pin types paired 1:1 with <see cref="PinNamePrefixes"/> (same length).
+    /// Null = legacy single-<see cref="PinType"/> behaviour.
+    /// </summary>
+    public PinType[]? PinTypes { get; init; }
+}
