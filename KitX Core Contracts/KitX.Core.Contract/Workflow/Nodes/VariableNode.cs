@@ -30,6 +30,14 @@ public class VariableNode : BlueprintNode
     /// </summary>
     public VariableKind VarKind { get; set; } = VariableKind.PubVar;
 
+    /// <summary>
+    /// Optional initial-value payload. For dict-typed vars this carries the JSON-serialised
+    /// <c>KsDictLiteral</c> so the BP→IR reverse path can rebuild the structured initialiser
+    /// (Package/Dict-Type-Design.md §3.3). For scalar-typed vars it may carry the verbatim
+    /// initialiser expression text. Null when the var has no initial value.
+    /// </summary>
+    public string? VarInitialValue { get; set; }
+
     public VariableNode()
     {
         NodeType = BlueprintNodeType.Variable;
