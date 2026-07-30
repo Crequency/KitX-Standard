@@ -83,6 +83,14 @@ public class KcsFileFormat
     /// 这是工作流的唯一真相源——BS 文本与 BP 图都是它的投影，按需生成，不再持久化。
     /// </summary>
     public string IrData { get; set; } = "{}";
+
+    /// <summary>
+    /// IR 格式版本："<c>v5</c>"（KitX.Workflow.Serialization.IrSerializer）或
+    /// "<c>v6</c>"（KitX.WorkflowV6.Serialization.WorkflowSerializer）。
+    /// 默认 "<c>v5</c>" 保持向后兼容——现有 .kcs 文件无此字段，反序列化时取默认值。
+    /// V6 工具（KcsBuilder）写入 "<c>v6</c>"。Dashboard 打开时据此选择编辑器。
+    /// </summary>
+    public string IrVersion { get; set; } = "v5";
 }
 
 /// <summary>
