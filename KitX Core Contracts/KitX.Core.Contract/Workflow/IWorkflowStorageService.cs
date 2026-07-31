@@ -14,12 +14,15 @@ public interface IWorkflowStorageService
     string StorageDirectory { get; }
 
     /// <summary>
-    /// Creates a new workflow with a default BlockScript template
+    /// Creates a new workflow with an empty IR (P5-A4). The <paramref name="irVersion"/>
+    /// selects the stored IR format: "v5" (WorkflowIR, default) or "v6" (WorkflowV6),
+    /// mirroring <see cref="KcsFileFormat.IrVersion"/> so the editor window dispatches correctly.
     /// </summary>
     /// <param name="name">Workflow name</param>
     /// <param name="description">Optional description</param>
+    /// <param name="irVersion">The stored IR format: "v5" or "v6".</param>
     /// <returns>The created workflow case</returns>
-    Task<IWorkflowCase> CreateWorkflowAsync(string name, string? description = null);
+    Task<IWorkflowCase> CreateWorkflowAsync(string name, string? description = null, string irVersion = "v5");
 
     /// <summary>
     /// Loads workflow data from a .kcs file
