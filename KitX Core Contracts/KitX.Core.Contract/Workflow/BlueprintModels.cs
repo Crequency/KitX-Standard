@@ -234,6 +234,16 @@ public class Blueprint
     public List<string> StatementPrimaryNodeIds { get; set; } = [];
 
     /// <summary>
+    /// Maps every node that belongs to a statement's *data subgraph* to that statement's
+    /// primary (leader) node id. A data subgraph is the connected component of data edges
+    /// reachable from the statement's primary node (KS one line ⇔ one data subgraph;
+    /// subgraphs never overlap). The frontend uses this to attach a group comment to any
+    /// data node — it lands on the containing statement's primary, matching the KS→BP
+    /// anchoring. Empty for blueprints that predate this field.
+    /// </summary>
+    public Dictionary<string, string> StatementNodeToPrimary { get; set; } = new();
+
+    /// <summary>
     /// Get node by ID
     /// </summary>
     public BlueprintNode? GetNodeById(string nodeId)
