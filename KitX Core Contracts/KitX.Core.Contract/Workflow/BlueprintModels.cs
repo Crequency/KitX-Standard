@@ -223,6 +223,17 @@ public class Blueprint
     public List<BlueprintGroupComment> GroupComments { get; set; } = [];
 
     /// <summary>
+    /// Ids of every statement's *primary* node — the node the exec chain enters for that
+    /// statement (Branch/Each/While/Switch control-flow node, or the last function/tap
+    /// node of a pipeline). Populated by the renderer; the frontend uses it to offer
+    /// group-comment anchoring on valid statement leaders (an arbitrary non-leader node
+    /// cannot carry a leading comment, since the reverse translator reattaches comments
+    /// by anchor node id).
+    /// Empty for blueprints that predate this field.
+    /// </summary>
+    public List<string> StatementPrimaryNodeIds { get; set; } = [];
+
+    /// <summary>
     /// Get node by ID
     /// </summary>
     public BlueprintNode? GetNodeById(string nodeId)
