@@ -35,65 +35,6 @@ public interface IWorkflowManagementService
 }
 
 /// <summary>
-/// Plugin service interface for workflow constant and helper function handling
-/// </summary>
-public interface IWorkflowPluginService
-{
-    /// <summary>
-    /// Parses constants from code
-    /// </summary>
-    List<VariableConstant> ParseConstantsFromCode(string code);
-}
-
-/// <summary>
-/// Block script service interface — the public surface consumed by Dashboard.
-///
-/// Only methods that take primitive/source parameters (string, List&lt;HelperFunction&gt;, ...)
-/// or return Dashboard-visible result types are kept here. Pipeline-internal methods that
-/// deal in the parsed <c>BlockScript</c> / <c>BlockScriptParseResult</c> models live on the
-/// workflow library's internal <c>IBlockScriptPipelineService</c> instead, so that those
-/// internal models need not be exposed through Contract.
-/// </summary>
-public interface IBlockScriptService
-{
-    /// <summary>
-    /// Validates a block script
-    /// </summary>
-    BlockScriptValidationResult ValidateBlockScript(string sourceCode);
-
-    /// <summary>
-    /// Parses constants from a BlockScript source's #ConstBlock section.
-    /// Only returns variables that have initial values (DefaultValue != null).
-    /// </summary>
-    List<VariableConstant> ParseConstantsFromBlockScript(string sourceCode);
-
-    /// <summary>
-    /// Executes a block script from source code with helper functions
-    /// </summary>
-    Task<BlockScriptExecutionResult> ExecuteBlockScriptAsync(
-        string sourceCode,
-        List<HelperFunction> helperFunctions,
-        System.Threading.CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Executes a block script from source code with helper functions and constant overrides.
-    /// Constant overrides replace the DefaultValue on ConstBlock variables before execution.
-    /// </summary>
-    Task<BlockScriptExecutionResult> ExecuteBlockScriptAsync(
-        string sourceCode,
-        List<HelperFunction> helperFunctions,
-        Dictionary<string, object?>? constantOverrides,
-        System.Threading.CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Preloads all persisted compiled scripts for a workflow from disk.
-    /// </summary>
-    /// <param name="workflowId">Workflow ID to preload scripts for.</param>
-    /// <returns>Number of scripts loaded from disk.</returns>
-    int PreloadCompiledScripts(string workflowId);
-}
-
-/// <summary>
 /// Workflow case interface
 /// </summary>
 public interface IWorkflowCase

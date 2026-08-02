@@ -13,14 +13,9 @@ namespace KitX.Core.Contract.Workflow;
 [JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToBaseType)]
 [JsonDerivedType(typeof(EntryNode), "Entry")]
 [JsonDerivedType(typeof(ConstNode), "Const")]
-[JsonDerivedType(typeof(CallNode), "Call")]
-[JsonDerivedType(typeof(CallHelperNode), "CallHelper")]
 [JsonDerivedType(typeof(VariableNode), "Variable")]
 [JsonDerivedType(typeof(BuiltinFunctionNode), "BuiltinFunction")]
 [JsonDerivedType(typeof(PluginTriggerNode), "PluginTrigger")]
-[JsonDerivedType(typeof(BlockNode), "Block")]
-[JsonDerivedType(typeof(EntryPointNode), "EntryPoint")]
-[JsonDerivedType(typeof(ExitPointNode), "ExitPoint")]
 public abstract partial class BlueprintNode
 {
     /// <summary>
