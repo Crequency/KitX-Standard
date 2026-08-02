@@ -201,6 +201,25 @@ public class RealPluginManager : IPluginManager
                 var responseJson = tcs.Task.Result;
                 _infoLogger($"[RealPluginManager] 收到插件响应: {responseJson}");
 
+                // 插件的函数返回值位于响应 Command 的 Body 中（与原生调用路径
+                // PluginsManager.CallPluginFunctionAsync 的解码行为对齐）。不解码
+                // 会把整个 Command 包装 JSON 当作返回值，导致工作流 PluginCall
+                // 拿到的不是函数结果（v6 Trigger 测试暴露的问题）。
+                var bodyText = TryDecodeResponseBody(responseJson);
+                if (bodyText is not null)
+                {
+                    if (typeof(T) == typeof(string))
+                        return (T)(object)bodyText;
+                    try
+                    {
+                        return JsonSerializer.Deserialize<T>(bodyText, _serializerOptions) ?? GetDefaultResult<T>();
+                    }
+                    catch (JsonException)
+                    {
+                        return GetDefaultResult<T>();
+                    }
+                }
+
                 // 尝试反序列化响应
                 try
                 {
@@ -235,6 +254,28 @@ public class RealPluginManager : IPluginManager
         {
             _errorLogger($"[RealPluginManager] 发送插件请求失败: {callInfo.PluginName}.{callInfo.MethodName} - 异常: {ex.Message}");
             return GetDefaultResult<T>();
+        }
+    }
+
+    /// <summary>
+    /// 尝试把插件响应解析为 Command 包装并解码其 Body。响应不是 Command 格式时返回 null，
+    /// 由调用方走原逻辑。
+    /// </summary>
+    private string? TryDecodeResponseBody(string responseJson)
+    {
+        try
+        {
+            var resp = JsonSerializer.Deserialize<Command>(responseJson, _serializerOptions);
+            if (resp.Body is { Length: > 0 } && resp.BodyLength > 0)
+            {
+                var bytes = resp.BodyLength <= resp.Body.Length ? resp.Body.AsSpan(0, resp.BodyLength).ToArray() : resp.Body;
+                return System.Text.Encoding.UTF8.GetString(bytes);
+            }
+            return null;
+        }
+        catch (JsonException)
+        {
+            return null;
         }
     }
 
