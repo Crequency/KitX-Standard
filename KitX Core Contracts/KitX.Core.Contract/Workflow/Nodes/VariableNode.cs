@@ -38,6 +38,14 @@ public class VariableNode : BlueprintNode
     /// </summary>
     public string? VarInitialValue { get; set; }
 
+    /// <summary>
+    /// Default value — the initial value from the KS script declaration
+    /// (<c>var { int counter = 0 }</c> → "0"). Read-only on the BP side; the node displays
+    /// <see cref="VarInitialValue"/> (user value) when set, otherwise falls back to this
+    /// default. Mirrors the KS editor's Variable Constants panel DefaultValue.
+    /// </summary>
+    public string? DefaultValue { get; set; }
+
     public VariableNode()
     {
         NodeType = BlueprintNodeType.Variable;
