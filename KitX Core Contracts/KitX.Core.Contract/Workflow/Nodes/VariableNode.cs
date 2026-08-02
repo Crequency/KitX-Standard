@@ -46,6 +46,15 @@ public class VariableNode : BlueprintNode
     /// </summary>
     public string? DefaultValue { get; set; }
 
+    /// <summary>
+    /// True when this node is a definition (a <c>var { ... }</c> block declaration)
+    /// rather than a usage node (a pipeline read/write reference). Set by the renderer
+    /// for <c>/def/var/{name}</c> nodes; the frontend reads this instead of inferring
+    /// definition-ness from pin presence or connectivity (those change over time;
+    /// definition-ness is fixed at creation).
+    /// </summary>
+    public bool IsDefinition { get; set; }
+
     public VariableNode()
     {
         NodeType = BlueprintNodeType.Variable;

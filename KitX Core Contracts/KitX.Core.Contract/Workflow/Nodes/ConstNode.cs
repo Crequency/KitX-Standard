@@ -28,6 +28,15 @@ public class ConstNode : BlueprintNode
     /// </summary>
     public string? DefaultValue { get; set; }
 
+    /// <summary>
+    /// True when this node is a definition (a <c>const { ... }</c> block declaration)
+    /// rather than a usage node (a pipeline-source literal). Set by the renderer for
+    /// <c>/def/const/{name}</c> nodes; the frontend reads this instead of inferring
+    /// definition-ness from pin presence or connectivity (those change over time;
+    /// definition-ness is fixed at creation).
+    /// </summary>
+    public bool IsDefinition { get; set; }
+
     public ConstNode()
     {
         NodeType = BlueprintNodeType.Const;
