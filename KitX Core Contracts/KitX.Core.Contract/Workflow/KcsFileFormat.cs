@@ -91,6 +91,31 @@ public class KcsFileFormat
     /// V6 工具（KcsBuilder）写入 "<c>v6</c>"。Dashboard 打开时据此选择编辑器。
     /// </summary>
     public string IrVersion { get; set; } = "v5";
+
+    /// <summary>
+    /// BP 画布布局（v6）：节点规范 ID → 画布坐标。规范 ID 是节点在
+    /// <c>KitX.WorkflowV6.Ir.NodeId.Of(path)</c>（FNV-1a of BpRenderer path）——
+    /// 与 <c>BpGraphLens.Project</c> 重投影后的节点 ID 一致，故加载端可直接查表覆写坐标。
+    /// 随机画布 ID 永不进入本字典（保存端经 Reverse 的 nodeId→canonical 映射归一化）。
+    /// 空/缺省 = 使用布局网格位（LayoutService）。旧 .kcs 文件无此字段（反序列化为 null）。
+    /// </summary>
+    public Dictionary<string, BlueprintLayoutEntry>? BlueprintLayout { get; set; }
+}
+
+/// <summary>
+/// BP 画布布局条目：单个节点的画布坐标（<see cref="KcsFileFormat.BlueprintLayout"/> 的值）。
+/// </summary>
+public class BlueprintLayoutEntry
+{
+    /// <summary>
+    /// 画布 X 坐标
+    /// </summary>
+    public double X { get; set; }
+
+    /// <summary>
+    /// 画布 Y 坐标
+    /// </summary>
+    public double Y { get; set; }
 }
 
 /// <summary>
