@@ -7,6 +7,13 @@ namespace KitX.Core.Contract.Workflow;
 /// no business payload. Plugins fire triggers via the TriggerFired command; the
 /// <see cref="ITriggerManager"/> matches the firing plugin/trigger against registered
 /// <see cref="TriggerConfig"/> subscriptions and runs each matching workflow.
+///
+/// Subscriptions are purely RUNTIME state: a workflow is armed only while the user
+/// keeps it Running (Run = register, Stop = unregister). There is deliberately NO
+/// startup re-subscription from persisted TriggerConfig — the Dashboard would
+/// otherwise silently arm every saved workflow at launch, desyncing the card's
+/// mounted indicator. A user-configurable "auto-start workflows at KitX launch"
+/// mechanism is planned as part of the Toolkit system (see Toolkit功能需求文档.md).
 /// </summary>
 public interface ITriggerManager
 {
@@ -24,11 +31,4 @@ public interface ITriggerManager
     /// </summary>
     /// <param name="workflowId">The workflow identifier.</param>
     void UnregisterWorkflowTrigger(string workflowId);
-
-    /// <summary>
-    /// Scans persisted workflow files and re-subscribes all configured triggers.
-    /// Called once after DI initialization completes, before plugins connect, so
-    /// that TriggerFired events arriving early can still be routed.
-    /// </summary>
-    void InitializeFromPersistedWorkflows();
 }
