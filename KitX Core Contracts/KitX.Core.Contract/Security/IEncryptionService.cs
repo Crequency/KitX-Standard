@@ -72,11 +72,4 @@ public interface IEncryptionService
     /// <param name="isSourceInBase64">Whether the source is in Base64</param>
     /// <returns>The decrypted string</returns>
     string AesDecrypt(string source, string key, bool isSourceInBase64 = true);
-
-    /// <summary>
-    /// Computes SHA1 hash of a string
-    /// </summary>
-    /// <param name="data">The data to hash</param>
-    /// <returns>The SHA1 hash string</returns>
-    string GetSHA1(string data);
 }
