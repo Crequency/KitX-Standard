@@ -156,12 +156,6 @@ public interface IDeviceServer
 public interface IDevicesOrganizer
 {
     /// <summary>
-    /// Updates the source and adds device cards
-    /// </summary>
-    /// <param name="deviceInfo">The device info</param>
-    void UpdateSourceAndAddCards(DeviceInfo deviceInfo);
-
-    /// <summary>
     /// Event raised when a device is discovered
     /// </summary>
     event EventHandler<DeviceDiscoveredEventArgs>? DeviceDiscovered;
