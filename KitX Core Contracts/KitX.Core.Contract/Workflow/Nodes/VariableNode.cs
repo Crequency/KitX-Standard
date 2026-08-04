@@ -72,5 +72,5 @@ public class VariableNode : BlueprintNode
         DisplayName: "Variable"
     );
 
-    public override string GetDisplayTitle() => $"{VarKind}: {VarName}";
+    public override string GetDisplayTitle() => VarName;
 }
