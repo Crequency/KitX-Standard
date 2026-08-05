@@ -36,10 +36,10 @@ public class DeviceLocator
         return this;
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is not DeviceLocator target)
-            throw new InvalidOperationException($"Currently you can not compare {nameof(DeviceLocator)} with other types.");
+            return false;
 
         var result = DeviceName.Equals(target.DeviceName) &&
             IPv4.Equals(target.IPv4) &&
@@ -50,7 +50,31 @@ public class DeviceLocator
         return result;
     }
 
-    public override int GetHashCode() => base.GetHashCode();
+    public override int GetHashCode()
+    {
+        var hash = Prime5;
+        hash = MixFinal(hash + (uint)DeviceName.GetHashCode());
+        hash = MixFinal(hash + (uint)IPv4.GetHashCode());
+        hash = MixFinal(hash + (uint)IPv6.GetHashCode());
+        hash = MixFinal(hash + (uint)MacAddress.GetHashCode());
+        return (int)hash;
+    }
+
+    private const uint Prime2 = 2246822519U;
+
+    private const uint Prime3 = 3266489917U;
+
+    private const uint Prime5 = 374761393U;
+
+    private static uint MixFinal(uint hash)
+    {
+        hash ^= hash >> 15;
+        hash *= Prime2;
+        hash ^= hash >> 13;
+        hash *= Prime3;
+        hash ^= hash >> 16;
+        return hash;
+    }
 }
 
 public static class DeviceLocatorExtensions
