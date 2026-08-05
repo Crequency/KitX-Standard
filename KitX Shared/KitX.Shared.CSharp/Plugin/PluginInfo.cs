@@ -37,5 +37,10 @@ public class PluginInfo
 
     public List<Function> Functions { get; set; } = [];
 
+    /// <summary>
+    /// 此插件可触发的触发器名称列表
+    /// </summary>
+    public List<string> SupportedTriggers { get; set; } = [];
+
     public string RootStartupFileName { get; set; } = string.Empty;
 }

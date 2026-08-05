@@ -163,7 +163,15 @@ public class Decoder(string packagePath, Options? options = null)
 
         #endregion
 
-        #region 获取源文件文件名与文件体并立即写回释放文件夹
+        #region 获取源文件文件名与文件体, 校验路径后写回释放文件夹
+
+        //  释放文件夹的完整路径前缀, 用于校验解包路径不逃逸到外部
+        var releaseRoot = Path.GetFullPath(releaseFolder)
+            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+            + Path.DirectorySeparatorChar;
+
+        //  先读取全部文件并逐个校验路径, 存在非法路径时整体拒绝, 不做半解包
+        var extracted = new List<Tuple<string, byte[]>>();
 
         foreach (var item in FileMap)
         {
@@ -177,14 +185,26 @@ public class Decoder(string packagePath, Options? options = null)
                 fb[i] = src[cursor];
 
             var fileName = Encoding.UTF8.GetString(fn);
-            var dirPath = Path.GetDirectoryName(
-                Path.GetFullPath($"{releaseFolder}/{fileName}")
-            );
+
+            //  校验文件路径必须位于释放文件夹内, 防御 ".." 路径穿越与绝对路径
+            var fullPath = Path.GetFullPath(Path.Combine(releaseFolder, fileName));
+
+            if (!fullPath.StartsWith(releaseRoot, StringComparison.Ordinal))
+                throw new InvalidDataException($"Invalid file path in KXP package: {fileName}");
+
+            extracted.Add(Tuple.Create(fileName, fb));
+        }
+
+        //  校验全部通过后再写回释放文件夹
+        foreach (var (fileName, fileBody) in extracted)
+        {
+            var fullPath = Path.GetFullPath(Path.Combine(releaseFolder, fileName));
+            var dirPath = Path.GetDirectoryName(fullPath);
 
             if (!Directory.Exists(dirPath))
                 Directory.CreateDirectory(dirPath);
 
-            File.WriteAllBytes($"{releaseFolder}/{fileName}", fb);
+            File.WriteAllBytes(fullPath, fileBody);
         }
 
         #endregion

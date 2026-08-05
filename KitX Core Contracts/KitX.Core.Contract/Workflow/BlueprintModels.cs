@@ -1,0 +1,231 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+
+namespace KitX.Core.Contract.Workflow;
+
+/// <summary>
+/// Simple 2D point structure for view positioning
+/// </summary>
+public struct ViewPoint
+{
+    public double X { get; set; }
+    public double Y { get; set; }
+
+    public ViewPoint(double x, double y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public static implicit operator (double X, double Y)(ViewPoint p) => (p.X, p.Y);
+    public static implicit operator ViewPoint((double X, double Y) p) => new(p.X, p.Y);
+}
+
+/// <summary>
+/// Connection between two pins
+/// </summary>
+public class BlueprintConnection
+{
+    /// <summary>
+/// Unique identifier
+/// </summary>
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+
+    /// <summary>
+    /// Source node ID
+    /// </summary>
+    public string SourceNodeId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Source pin ID
+    /// </summary>
+    public string SourcePinId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Target node ID
+    /// </summary>
+    public string TargetNodeId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Target pin ID
+    /// </summary>
+    public string TargetPinId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Corresponding PubVar name for data flow connections (optional)
+    /// </summary>
+    public string? PubVarName { get; set; }
+}
+
+/// <summary>
+/// A statement-level (data-connection subgraph) comment. Backs the KS
+/// <c>LeadingComment</c> through the BP round-trip: one KS statement maps to one
+/// data-connection subgraph, and this comment annotates that whole subgraph.
+/// <see cref="AnchorNodeId"/> is the statement's primary node (the node the exec
+/// chain enters) so the reverse translator can reattach it. <see cref="NodeIds"/>
+/// lists the subgraph's nodes for frontend box-rendering (optional).
+/// </summary>
+public class BlueprintGroupComment
+{
+    /// <summary>The comment text (may contain multiple lines joined by <c>\n</c>).</summary>
+    public string Comment { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The statement's primary node id (the node the exec chain enters — Branch/Each/
+    /// While/Switch/control node, or the last function node of a pipeline). The reverse
+    /// translator matches leading comments by this id.
+    /// </summary>
+    public string AnchorNodeId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// All node ids belonging to this statement's data-connection subgraph (for frontend
+    /// box/highlight rendering). Optional; may be empty.
+    /// </summary>
+    public List<string> NodeIds { get; set; } = [];
+}
+
+/// <summary>
+/// Blueprint document container
+/// </summary>
+public class Blueprint
+{
+    /// <summary>
+    /// Unique identifier
+    /// </summary>
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+
+    /// <summary>
+    /// Document name
+    /// </summary>
+    public string Name { get; set; } = "Untitled";
+
+    /// <summary>
+    /// Creation timestamp
+    /// </summary>
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+    /// <summary>
+    /// Last modified timestamp
+    /// </summary>
+    public DateTime ModifiedAt { get; set; } = DateTime.Now;
+
+    /// <summary>
+    /// All nodes in this blueprint
+    /// </summary>
+    public List<BlueprintNode> Nodes { get; set; } = [];
+
+    /// <summary>
+    /// All connections in this blueprint
+    /// </summary>
+    public List<BlueprintConnection> Connections { get; set; } = [];
+
+    /// <summary>
+    /// View zoom level (0.1 to 5.0)
+    /// </summary>
+    public double ZoomLevel { get; set; } = 1.0;
+
+    /// <summary>
+    /// View pan offset
+    /// </summary>
+    public ViewPoint PanOffset { get; set; } = new(0, 0);
+
+    /// <summary>
+    /// Helper functions available in this blueprint
+    /// </summary>
+    public List<HelperFunction> HelperFunctions { get; set; } = [];
+
+    /// <summary>
+    /// PubVar variable names (invisible in Blueprint, used for data flow)
+    /// </summary>
+    public List<string> PubVarNames { get; set; } = [];
+
+    /// <summary>
+    /// Constant values (from ConstBlock)
+    /// </summary>
+    public List<VariableConstant> ConstValues { get; set; } = [];
+
+    /// <summary>
+    /// Statement-level (data-connection subgraph) comments. Each entry attaches a
+    /// leading comment to the set of nodes forming one KS statement's data subgraph
+    /// (one KS statement == one data-connection subgraph). <see cref="BlueprintGroupComment.AnchorNodeId"/>
+    /// is the statement's primary node (the node the exec chain enters), used by the
+    /// reverse translator to reattach the comment as a leading comment.
+    /// Empty for blueprints without preserved leading comments.
+    /// </summary>
+    public List<BlueprintGroupComment> GroupComments { get; set; } = [];
+
+    /// <summary>
+    /// Ids of every statement's *primary* node — the node the exec chain enters for that
+    /// statement (Branch/Each/While/Switch control-flow node, or the last function/tap
+    /// node of a pipeline). Populated by the renderer; the frontend uses it to offer
+    /// group-comment anchoring on valid statement leaders (an arbitrary non-leader node
+    /// cannot carry a leading comment, since the reverse translator reattaches comments
+    /// by anchor node id).
+    /// Empty for blueprints that predate this field.
+    /// </summary>
+    public List<string> StatementPrimaryNodeIds { get; set; } = [];
+
+    /// <summary>
+    /// Maps every node that belongs to a statement's *data subgraph* to that statement's
+    /// primary (leader) node id. A data subgraph is the connected component of data edges
+    /// reachable from the statement's primary node (KS one line ⇔ one data subgraph;
+    /// subgraphs never overlap). The frontend uses this to attach a group comment to any
+    /// data node — it lands on the containing statement's primary, matching the KS→BP
+    /// anchoring. Empty for blueprints that predate this field.
+    /// </summary>
+    public Dictionary<string, string> StatementNodeToPrimary { get; set; } = new();
+
+    /// <summary>
+    /// Get node by ID
+    /// </summary>
+    public BlueprintNode? GetNodeById(string nodeId)
+    {
+        foreach (var node in Nodes)
+            if (node.Id == nodeId) return node;
+        return null;
+    }
+
+    /// <summary>
+    /// Get connections from a node
+    /// </summary>
+    public IEnumerable<BlueprintConnection> GetConnectionsFrom(string nodeId)
+    {
+        foreach (var conn in Connections)
+            if (conn.SourceNodeId == nodeId) yield return conn;
+    }
+
+    /// <summary>
+    /// Get connections to a node
+    /// </summary>
+    public IEnumerable<BlueprintConnection> GetConnectionsTo(string nodeId)
+    {
+        foreach (var conn in Connections)
+            if (conn.TargetNodeId == nodeId) yield return conn;
+    }
+
+    /// <summary>
+    /// Add a node to this blueprint, automatically setting the back-reference
+    /// </summary>
+    /// <param name="node">Node to add</param>
+    public void AddNode(BlueprintNode node)
+    {
+        node.Blueprint = this;
+        Nodes.Add(node);
+    }
+
+    /// <summary>
+    /// Add a connection to this blueprint (deduplicates by source/target/pin)
+    /// </summary>
+    /// <param name="connection">Connection to add</param>
+    public void AddConnection(BlueprintConnection connection)
+    {
+        var alreadyExists = Connections.Any(c =>
+            c.SourceNodeId == connection.SourceNodeId && c.SourcePinId == connection.SourcePinId &&
+            c.TargetNodeId == connection.TargetNodeId && c.TargetPinId == connection.TargetPinId);
+        if (!alreadyExists)
+            Connections.Add(connection);
+    }
+}
