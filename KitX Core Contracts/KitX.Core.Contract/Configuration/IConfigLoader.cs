@@ -17,5 +17,5 @@ public interface IConfigLoader
     /// <summary>
     /// Loads SecurityConfig with special handling
     /// </summary>
-    ISecurityConfig LoadSecurityConfig(string location);
+    ISecurityConf LoadSecurityConfig(string location);
 }

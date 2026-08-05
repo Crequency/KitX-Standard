@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,69 +6,6 @@ using System.Collections.Generic;
 using KitX.Shared.CSharp.Device;
 
 namespace KitX.Core.Contract.Device;
-
-/// <summary>
-/// Device management service interface
-/// </summary>
-public interface IDeviceService
-{
-    /// <summary>
-    /// Gets the discovered devices list
-    /// </summary>
-    IReadOnlyList<IDeviceCase> DiscoveredDevices { get; }
-
-    /// <summary>
-    /// Gets the authorized devices list
-    /// </summary>
-    IReadOnlyList<IDeviceCase> AuthorizedDevices { get; }
-
-    /// <summary>
-    /// Gets the self device information
-    /// </summary>
-    DeviceInfo SelfDeviceInfo { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether this device is the main device
-    /// </summary>
-    bool IsMainDevice { get; }
-
-    /// <summary>
-    /// Authorizes a device
-    /// </summary>
-    /// <param name="deviceId">The device ID</param>
-    /// <param name="deviceKey">The device key</param>
-    /// <returns>True if authorization was successful</returns>
-    Task<bool> AuthorizeDeviceAsync(string deviceId, string deviceKey);
-
-    /// <summary>
-    /// Unauthorizes a device
-    /// </summary>
-    /// <param name="deviceId">The device ID</param>
-    /// <returns>True if unauthorization was successful</returns>
-    Task<bool> UnauthorizeDeviceAsync(string deviceId);
-
-    /// <summary>
-    /// Connects to a device
-    /// </summary>
-    /// <param name="deviceId">The device ID</param>
-    /// <returns>True if connection was successful</returns>
-    Task<bool> ConnectToDeviceAsync(string deviceId);
-
-    /// <summary>
-    /// Event raised when a device is discovered
-    /// </summary>
-    event EventHandler<DeviceDiscoveredEventArgs>? DeviceDiscovered;
-
-    /// <summary>
-    /// Event raised when a device goes offline
-    /// </summary>
-    event EventHandler<DeviceOfflineEventArgs>? DeviceOffline;
-
-    /// <summary>
-    /// Event raised when the main device changes
-    /// </summary>
-    event EventHandler<MainDeviceChangedEventArgs>? MainDeviceChanged;
-}
 
 /// <summary>
 /// Device discovery service interface
@@ -134,20 +70,20 @@ public interface IDeviceServer
     /// </summary>
     /// <param name="locator">The device locator</param>
     /// <returns>True if the device is signed in</returns>
-    bool IsDeviceSignedIn(KitX.Shared.CSharp.Device.DeviceLocator locator);
+    bool IsDeviceSignedIn(DeviceLocator locator);
 
     /// <summary>
     /// Gets the signed device token for a device locator
     /// </summary>
     /// <param name="locator">The device locator</param>
     /// <returns>The token or null if not found</returns>
-    string? GetDeviceToken(KitX.Shared.CSharp.Device.DeviceLocator locator);
+    string? GetDeviceToken(DeviceLocator locator);
 
     /// <summary>
     /// Gets all signed-in device locators
     /// </summary>
     /// <returns>Read-only list of signed-in device locators</returns>
-    System.Collections.Generic.IReadOnlyList<KitX.Shared.CSharp.Device.DeviceLocator> GetSignedInDevices();
+    IReadOnlyList<DeviceLocator> GetSignedInDevices();
 }
 
 /// <summary>
@@ -217,22 +153,6 @@ public class DeviceOfflineEventArgs : EventArgs
     /// Gets or sets the device ID
     /// </summary>
     public string DeviceId { get; set; } = string.Empty;
-}
-
-/// <summary>
-/// Main device changed event arguments
-/// </summary>
-public class MainDeviceChangedEventArgs : EventArgs
-{
-    /// <summary>
-    /// Gets or sets the old main device ID
-    /// </summary>
-    public string OldMainDeviceId { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets the new main device ID
-    /// </summary>
-    public string NewMainDeviceId { get; set; } = string.Empty;
 }
 
 /// <summary>

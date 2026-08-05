@@ -85,12 +85,13 @@ public class KcsFileFormat
     public string IrData { get; set; } = "{}";
 
     /// <summary>
-    /// IR 格式版本："<c>v5</c>"（KitX.Workflow.Serialization.IrSerializer）或
-    /// "<c>v6</c>"（KitX.WorkflowV6.Serialization.WorkflowSerializer）。
-    /// 默认 "<c>v5</c>" 保持向后兼容——现有 .kcs 文件无此字段，反序列化时取默认值。
+    /// IR 格式版本："<c>v6</c>"（KitX.WorkflowV6.Serialization.WorkflowSerializer）或
+    /// "<c>v5</c>"（KitX.Workflow.Serialization.IrSerializer，已归档）。
+    /// 默认 "<c>v6</c>"——v5 已归档，只产 v6。
+    /// 旧 .kcs 文件无此字段，反序列化时取默认值；老文件显式写了 "<c>v5</c>" 的仍按 v5 处理。
     /// V6 工具（KcsBuilder）写入 "<c>v6</c>"。Dashboard 打开时据此选择编辑器。
     /// </summary>
-    public string IrVersion { get; set; } = "v5";
+    public string IrVersion { get; set; } = "v6";
 
     /// <summary>
     /// BP 画布布局（v6）：节点规范 ID → 画布坐标。规范 ID 是节点在

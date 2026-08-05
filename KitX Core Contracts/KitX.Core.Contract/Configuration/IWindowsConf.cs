@@ -22,7 +22,6 @@ public interface IMainWindowConf
     WindowState WindowState { get; set; }
     bool IsHidden { get; set; }
     Dictionary<string, string> Tags { get; set; }
-    bool EnabledMica { get; set; }
     int GreetingTextCount_Morning { get; set; }
     int GreetingTextCount_Noon { get; set; }
     int GreetingTextCount_AfterNoon { get; set; }
@@ -39,3 +38,4 @@ public interface IAnnouncementWindowConf
     Resolution Size { get; set; }
     Distances Location { get; set; }
 }
+

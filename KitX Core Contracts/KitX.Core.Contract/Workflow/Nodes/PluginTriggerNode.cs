@@ -16,14 +16,7 @@ public class PluginTriggerNode : BlueprintNode
     {
         NodeType = BlueprintNodeType.PluginTrigger;
         Name = "PluginTrigger";
-        InitializePinsFromDescriptor();
     }
-
-    public override NodeDescriptor GetDescriptor() => new(
-        InputPins: [],
-        OutputPins: [new PinDescriptor("Exec", PinType.Execution, 30)],
-        DisplayName: "PluginTrigger"
-    );
 
     public override string GetDisplayTitle()
         => string.IsNullOrEmpty(PluginName)

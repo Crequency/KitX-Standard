@@ -14,7 +14,7 @@ public interface IAnnouncementService
     /// <summary>
     /// Gets the announcement configuration
     /// </summary>
-    IAnnouncementConfig AnnouncementConfig { get; }
+    IAnnouncementConf AnnouncementConfig { get; }
 
     /// <summary>
     /// Checks for new announcements

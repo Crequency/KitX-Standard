@@ -19,19 +19,6 @@ public class BuiltinFunctionNode : BlueprintNode
     /// </summary>
     public Dictionary<string, string> Properties { get; set; } = [];
 
-    private NodeDescriptor? _descriptor;
-
-    /// <summary>
-    /// 由 BuiltinFunctionRegistry 在创建节点时设置，基于 IBuiltinFunctionDefinition 的引脚描述
-    /// </summary>
-    public void SetDescriptor(NodeDescriptor descriptor) => _descriptor = descriptor;
-
-    public override NodeDescriptor GetDescriptor() => _descriptor ?? new(
-        InputPins: [],
-        OutputPins: [],
-        DisplayName: FunctionName
-    );
-
     public BuiltinFunctionNode()
     {
         NodeType = BlueprintNodeType.BuiltinFunction;

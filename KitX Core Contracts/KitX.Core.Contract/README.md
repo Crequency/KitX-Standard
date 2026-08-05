@@ -25,9 +25,18 @@ Core Service Implementations (Managers)
 
 ### Configuration
 - `IConfigService` - Configuration management service
-- `IAppConfig` - Application configuration
-- `IPluginsConfig` - Plugins configuration
-- `ISecurityConfig` - Security configuration
+- `IAppConfig` - Application configuration (aggregate root)
+- `IAppConf` - Application base configuration section
+- `IPluginsConf` - Plugins configuration
+- `ISecurityConf` - Security configuration
+- `IAnnouncementConf` - Announcements configuration
+- `ILogConf` - Log configuration section
+- `IPagesConf` - Pages configuration section
+- `IWindowsConf` - Windows configuration section
+- `IWebConf` - Web configuration section
+- `IIOConf` - IO configuration section
+- `IActivityConf` - Activity configuration section
+- `ILoadersConf` - Loaders configuration section
 
 ### Plugin Management
 - `IPluginService` - Plugin lifecycle management
@@ -35,7 +44,6 @@ Core Service Implementations (Managers)
 - `IPluginConnector` - Individual plugin connection handler
 
 ### Device Management
-- `IDeviceService` - Device discovery and management
 - `IDeviceDiscoveryService` - UDP broadcast device discovery
 - `IDeviceServer` - HTTP API server for device communication
 - `IDevicesOrganizer` - Device organization and tracking

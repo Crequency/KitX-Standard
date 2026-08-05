@@ -15,12 +15,12 @@ public interface IConfigService
     /// <summary>
     /// Gets the plugins configuration
     /// </summary>
-    IPluginsConfig PluginsConfig { get; }
+    IPluginsConf PluginsConfig { get; }
 
     /// <summary>
     /// Gets the security configuration
     /// </summary>
-    ISecurityConfig SecurityConfig { get; }
+    ISecurityConf SecurityConfig { get; }
 
     /// <summary>
     /// Loads all configurations from files

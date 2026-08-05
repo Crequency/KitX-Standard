@@ -15,14 +15,15 @@ public interface IWorkflowStorageService
 
     /// <summary>
     /// Creates a new workflow with an empty IR (P5-A4). The <paramref name="irVersion"/>
-    /// selects the stored IR format: "v5" (WorkflowIR, default) or "v6" (WorkflowV6),
+    /// selects the stored IR format: "v6" (WorkflowV6, default) or "v5" (WorkflowIR,
+    /// legacy/archived — v5 has been archived, new workflows are produced as v6),
     /// mirroring <see cref="KcsFileFormat.IrVersion"/> so the editor window dispatches correctly.
     /// </summary>
     /// <param name="name">Workflow name</param>
     /// <param name="description">Optional description</param>
-    /// <param name="irVersion">The stored IR format: "v5" or "v6".</param>
+    /// <param name="irVersion">The stored IR format: "v6" or "v5".</param>
     /// <returns>The created workflow case</returns>
-    Task<IWorkflowCase> CreateWorkflowAsync(string name, string? description = null, string irVersion = "v5");
+    Task<IWorkflowCase> CreateWorkflowAsync(string name, string? description = null, string irVersion = "v6");
 
     /// <summary>
     /// Loads workflow data from a .kcs file

@@ -9,12 +9,21 @@ namespace KitX.Core.Contract.Configuration;
 /// <summary>
 /// Plugins configuration interface
 /// </summary>
-public interface IPluginsConfig
+public interface IPluginsConf
 {
     /// <summary>
     /// Gets or sets the list of plugin installations
     /// </summary>
     IList<IPluginInstallation> Plugins { get; set; }
+}
+
+/// <summary>
+/// Backward-compatible alias of <see cref="IPluginsConf"/>.
+/// Deprecated: use <see cref="IPluginsConf"/> instead.
+/// </summary>
+[Obsolete("Use IPluginsConf instead.")]
+public interface IPluginsConfig : IPluginsConf
+{
 }
 
 /// <summary>

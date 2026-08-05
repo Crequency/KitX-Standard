@@ -6,9 +6,23 @@ namespace KitX.Core.Contract.Configuration;
 public interface IPagesConf
 {
     IHomePageConf Home { get; set; }
-    object? Device { get; set; }
-    object? Market { get; set; }
+    IDevicePageConf Device { get; set; }
+    IMarketPageConf Market { get; set; }
     ISettingsPageConf Settings { get; set; }
+}
+
+/// <summary>
+/// Device page configuration
+/// </summary>
+public interface IDevicePageConf
+{
+}
+
+/// <summary>
+/// Market page configuration
+/// </summary>
+public interface IMarketPageConf
+{
 }
 
 /// <summary>

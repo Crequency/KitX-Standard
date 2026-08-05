@@ -59,18 +59,7 @@ public class VariableNode : BlueprintNode
     {
         NodeType = BlueprintNodeType.Variable;
         Name = "Variable";
-        InitializePinsFromDescriptor();
     }
-
-    /// <summary>
-    /// One <c>Value</c> input pin (write/Set) and one <c>Value</c> output pin (read/Get).
-    /// Both are <c>Any</c>-typed at the node level; the connected data carries the actual type.
-    /// </summary>
-    public override NodeDescriptor GetDescriptor() => new(
-        InputPins: [new PinDescriptor("Value", PinType.Any, 25)],
-        OutputPins: [new PinDescriptor("Value", PinType.Any, 75)],
-        DisplayName: "Variable"
-    );
 
     public override string GetDisplayTitle() => VarName;
 }

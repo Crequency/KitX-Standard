@@ -1,5 +1,3 @@
-using Serilog.Events;
-
 namespace KitX.Core.Contract.Configuration;
 
 /// <summary>
@@ -12,5 +10,5 @@ public interface ILogConf
     string LogTemplate { get; set; }
     int LogFileMaxCount { get; set; }
     int LogFileFlushInterval { get; set; }
-    public LogEventLevel LogLevel { get; set; }
+    LogLevel LogLevel { get; set; }
 }

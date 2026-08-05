@@ -27,5 +27,5 @@ public interface IWebConf
     string UpdateDownloadPath { get; set; }
     string UpdateChannel { get; set; }
     string UpdateSource { get; set; }
-    int DebugServicesServerPort { get; set; }
 }
+

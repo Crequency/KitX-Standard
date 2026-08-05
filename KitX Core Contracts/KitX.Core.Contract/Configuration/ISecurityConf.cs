@@ -7,12 +7,21 @@ namespace KitX.Core.Contract.Configuration;
 /// <summary>
 /// Security configuration interface
 /// </summary>
-public interface ISecurityConfig
+public interface ISecurityConf
 {
     /// <summary>
     /// Gets or sets the device keys list
     /// </summary>
     IList<IDeviceKey> DeviceKeys { get; set; }
+}
+
+/// <summary>
+/// Backward-compatible alias of <see cref="ISecurityConf"/>.
+/// Deprecated: use <see cref="ISecurityConf"/> instead.
+/// </summary>
+[Obsolete("Use ISecurityConf instead.")]
+public interface ISecurityConfig : ISecurityConf
+{
 }
 
 /// <summary>

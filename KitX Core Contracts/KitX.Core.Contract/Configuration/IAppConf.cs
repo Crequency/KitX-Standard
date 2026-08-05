@@ -4,6 +4,12 @@ namespace KitX.Core.Contract.Configuration;
 
 /// <summary>
 /// Application configuration interface (complete structure)
+/// <para>
+/// Aggregate root of the configuration sections. Retains the <c>*Config</c> name
+/// because the <c>*Conf</c> equivalent (<see cref="IAppConf"/>, the App section)
+/// is already taken; all section interfaces are unified under the <c>*Conf</c>
+/// naming convention.
+/// </para>
 /// </summary>
 public interface IAppConfig
 {

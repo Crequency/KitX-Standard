@@ -106,29 +106,8 @@ public abstract partial class BlueprintNode
     }
 
     /// <summary>
-    /// Returns the layout descriptor for this node type.
-    /// Each node subclass must define its own pin layout, width, and height.
-    /// Used by the node registry and UI rendering to avoid external switch statements.
-    /// </summary>
-    public abstract NodeDescriptor GetDescriptor();
-
-    /// <summary>
     /// Returns the display title for UI rendering (e.g., "Call: Plugin.Func").
     /// Default implementation returns Name; subclasses override for richer display.
     /// </summary>
     public virtual string GetDisplayTitle() => Name;
-
-    /// <summary>
-    /// Initializes InputPins and OutputPins from GetDescriptor().
-    /// Subclasses should call this in their constructor instead of manually adding pins.
-    /// This ensures the descriptor is the single source of truth for pin layout.
-    /// </summary>
-    protected void InitializePinsFromDescriptor()
-    {
-        var desc = GetDescriptor();
-        foreach (var pd in desc.InputPins)
-            InputPins.Add(new BlueprintPin { Name = pd.Name, Direction = PinDirection.Input, Type = pd.Type });
-        foreach (var pd in desc.OutputPins)
-            OutputPins.Add(new BlueprintPin { Name = pd.Name, Direction = PinDirection.Output, Type = pd.Type });
-    }
 }
