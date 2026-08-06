@@ -81,5 +81,13 @@ public static class DeviceLocatorExtensions
 {
     public static bool IsSameDevice(this DeviceLocator current, DeviceLocator target)
         => current.DeviceName.Equals(target.DeviceName)
-        && current.MacAddress.Equals(target.MacAddress);
+        && NormalizeMac(current.MacAddress).Equals(NormalizeMac(target.MacAddress));
+
+    /// <summary>
+    /// Normalizes a MAC address for comparison — strips separators (":", "-") and
+    /// ignores case, so "50:5A:65:4F:BF:DD", "505A654FBFDD" and "50-5a-65-4f-bf-dd"
+    /// all compare equal. A single source can emit different formats over time.
+    /// </summary>
+    private static string NormalizeMac(string mac)
+        => mac.Replace(":", "").Replace("-", "").ToUpperInvariant();
 }
