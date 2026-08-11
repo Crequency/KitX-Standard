@@ -84,6 +84,19 @@ public interface IDeviceServer
     /// </summary>
     /// <returns>Read-only list of signed-in device locators</returns>
     IReadOnlyList<DeviceLocator> GetSignedInDevices();
+
+    /// <summary>
+    /// Accepts a pending device key exchange request with the temporary password
+    /// entered by the user (read from the initiating device's screen).
+    /// </summary>
+    /// <param name="password">The temporary password used to decrypt the exchanged key payload</param>
+    /// <returns>True if the exchange was accepted, false if no exchange is pending</returns>
+    bool AcceptExchangeKey(string password);
+
+    /// <summary>
+    /// Rejects a pending device key exchange request.
+    /// </summary>
+    void RejectExchangeKey();
 }
 
 /// <summary>
