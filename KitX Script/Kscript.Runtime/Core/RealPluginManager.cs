@@ -97,6 +97,76 @@ public class RealPluginManager : IPluginManager
     }
 
     /// <summary>
+    /// 发送插件方法调用但不等待响应（fire-and-forget）。用于 void/副作用类插件函数
+    /// （弹窗、通知、设备动作等）：发送成功后工作流立即继续，不等插件回包。
+    /// </summary>
+    public void Notify(PluginCallInfo callInfo)
+    {
+        try
+        {
+            _infoLogger($"[RealPluginManager] Fire-and-forget 调用插件方法: {callInfo}");
+
+            var pluginInfo = _serviceProvider.FindPlugin(callInfo.PluginName);
+            if (pluginInfo == null)
+            {
+                _infoLogger($"[RealPluginManager] 未找到插件: {callInfo.PluginName}");
+                return;
+            }
+
+            var connector = _serviceProvider.FindConnector(pluginInfo);
+            if (connector == null)
+            {
+                _infoLogger($"[RealPluginManager] 插件 {callInfo.PluginName} 未连接");
+                return;
+            }
+
+            var connectorInstance = new Connector()
+                .SetSerializer(x => JsonSerializer.Serialize(x, _serializerOptions))
+                .SetSender(request =>
+                {
+                    // One-way send: no TaskCompletionSource, no await — transport errors
+                    // surface through the plugin server logs, not the workflow.
+                    _serviceProvider.SendRequestAsync(connector, request).ConfigureAwait(false);
+                });
+
+            var functionArgs = new List<Parameter>();
+            for (int i = 0; i < callInfo.Parameters.Length; i++)
+            {
+                var paramValue = callInfo.Parameters[i]?.ToString() ?? string.Empty;
+                var paramName = callInfo.ParameterNames?.Length > i ? callInfo.ParameterNames[i] : $"param{i}";
+                var paramType = callInfo.ParameterTypes?.Length > i ? callInfo.ParameterTypes[i].Name : "string";
+
+                functionArgs.Add(new Parameter
+                {
+                    Name = paramName,
+                    Type = paramType,
+                    Value = paramValue,
+                    IsOptional = false
+                });
+            }
+
+            _ = connectorInstance
+                .Request()
+                .ReceiveCommand()
+                .UpdateCommand(cmd =>
+                {
+                    cmd.FunctionName = callInfo.MethodName;
+                    cmd.FunctionArgs = functionArgs;
+                    cmd.PluginConnectionId = callInfo.PluginName;
+                    cmd.Tags = new Dictionary<string, string>();
+                    return cmd;
+                })
+                .Send();
+
+            _infoLogger($"[RealPluginManager] Fire-and-forget request sent: {callInfo}");
+        }
+        catch (Exception ex)
+        {
+            _errorLogger($"[RealPluginManager] Fire-and-forget 调用插件方法失败: {callInfo} - 异常: {ex.Message}");
+        }
+    }
+
+    /// <summary>
     /// 检查插件是否存在
     /// </summary>
     public bool IsPluginExists(string pluginName)

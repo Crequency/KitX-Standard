@@ -22,6 +22,12 @@ public interface IPluginManager
     void Call(PluginCallInfo callInfo);
 
     /// <summary>
+    /// 发送插件方法调用但不等待响应（fire-and-forget）。
+    /// 生产实现应真正单向发送；测试/占位实现可退回同步 Call（接口默认实现）。
+    /// </summary>
+    void Notify(PluginCallInfo callInfo) => Call(callInfo);
+
+    /// <summary>
     /// 检查插件是否存在
     /// </summary>
     /// <param name="pluginName">插件名称</param>
