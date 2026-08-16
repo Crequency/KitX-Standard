@@ -55,4 +55,28 @@ public interface IEventService
     /// <param name="args">The event arguments</param>
     void Publish<TEventArgs>(string eventName, TEventArgs args)
         where TEventArgs : EventArgs;
+
+    /// <summary>
+    /// Subscribes to a strongly-typed topic, keyed by <typeparamref name="TEvent"/>.
+    /// The handler is dispatched onto the <see cref="SynchronizationContext"/> captured at
+    /// subscribe time when a publish happens on a different context (automatic UI-thread
+    /// marshalling). Compile-time type safety — no string topic, no payload type mismatch.
+    /// </summary>
+    /// <typeparam name="TEvent">The event payload type (the topic key).</typeparam>
+    /// <param name="handler">The handler invoked with the published payload.</param>
+    void Subscribe<TEvent>(Action<TEvent> handler);
+
+    /// <summary>
+    /// Unsubscribes a strongly-typed handler previously added via <see cref="Subscribe{TEvent}"/>.
+    /// </summary>
+    /// <typeparam name="TEvent">The event payload type (the topic key).</typeparam>
+    /// <param name="handler">The handler to remove.</param>
+    void Unsubscribe<TEvent>(Action<TEvent> handler);
+
+    /// <summary>
+    /// Publishes a strongly-typed event to all subscribers of <typeparamref name="TEvent"/>.
+    /// </summary>
+    /// <typeparam name="TEvent">The event payload type (the topic key).</typeparam>
+    /// <param name="payload">The event payload.</param>
+    void Publish<TEvent>(TEvent payload);
 }
