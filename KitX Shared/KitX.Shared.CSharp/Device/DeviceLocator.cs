@@ -80,7 +80,7 @@ public class DeviceLocator
 public static class DeviceLocatorExtensions
 {
     public static bool IsSameDevice(this DeviceLocator current, DeviceLocator target)
-        => current.DeviceName.Equals(target.DeviceName)
+        => string.Equals(current.DeviceName, target.DeviceName, StringComparison.OrdinalIgnoreCase)
         && NormalizeMac(current.MacAddress).Equals(NormalizeMac(target.MacAddress));
 
     /// <summary>
