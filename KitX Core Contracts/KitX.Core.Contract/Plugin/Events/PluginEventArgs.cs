@@ -84,17 +84,6 @@ public class PluginUnregisteredEventArgs : EventArgs
 }
 
 /// <summary>
-/// Plugin connected event arguments
-/// </summary>
-public class PluginConnectedEventArgs : EventArgs
-{
-    /// <summary>
-    /// Gets or sets the connection ID
-    /// </summary>
-    public string? ConnectionId { get; set; }
-}
-
-/// <summary>
 /// Plugin disconnected event arguments
 /// </summary>
 public class PluginDisconnectedEventArgs : EventArgs

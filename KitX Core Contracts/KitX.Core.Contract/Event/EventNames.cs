@@ -21,16 +21,6 @@ public static class EventNames
     public const string AppConfigChanged = "AppConfigChanged";
 
     /// <summary>
-    /// Plugins config changed event
-    /// </summary>
-    public const string PluginsConfigChanged = "PluginsConfigChanged";
-
-    /// <summary>
-    /// Mica opacity changed event
-    /// </summary>
-    public const string MicaOpacityChanged = "MicaOpacityChanged";
-
-    /// <summary>
     /// Develop settings changed event
     /// </summary>
     public const string DevelopSettingsChanged = "DevelopSettingsChanged";
@@ -61,29 +51,9 @@ public static class EventNames
     public const string PluginsServerPortChanged = "PluginsServerPortChanged";
 
     /// <summary>
-    /// Activities updated event
-    /// </summary>
-    public const string OnActivitiesUpdated = "OnActivitiesUpdated";
-
-    /// <summary>
-    /// Receive cancel exchanging device key event
-    /// </summary>
-    public const string OnReceiveCancelExchangingDeviceKey = "OnReceiveCancelExchangingDeviceKey";
-
-    /// <summary>
     /// Exiting event
     /// </summary>
     public const string OnExiting = "OnExiting";
-
-    /// <summary>
-    /// Receiving device info event
-    /// </summary>
-    public const string OnReceivingDeviceInfo = "OnReceivingDeviceInfo";
-
-    /// <summary>
-    /// Config hot reloaded event
-    /// </summary>
-    public const string OnConfigHotReloaded = "OnConfigHotReloaded";
 
     /// <summary>
     /// Accepting device key event
@@ -99,7 +69,6 @@ public static class EventNames
     /// <summary>
     /// Plugin connected event
     /// </summary>
-    public const string PluginConnected = "PluginConnected";
 
     /// <summary>
     /// Plugin disconnected event
@@ -117,44 +86,14 @@ public static class EventNames
     public const string PluginUnregistered = "PluginUnregistered";
 
     /// <summary>
-    /// Plugin message received event
-    /// </summary>
-    public const string PluginMessageReceived = "PluginMessageReceived";
-
-    /// <summary>
     /// Plugin response event (has RequestId)
     /// </summary>
     public const string PluginResponse = "PluginResponse";
 
     /// <summary>
-    /// Workflow created event
-    /// </summary>
-    public const string WorkflowCreated = "WorkflowCreated";
-
-    /// <summary>
-    /// Workflow deleted event
-    /// </summary>
-    public const string WorkflowDeleted = "WorkflowDeleted";
-
-    /// <summary>
-    /// Workflow renamed event
-    /// </summary>
-    public const string WorkflowRenamed = "WorkflowRenamed";
-
-    /// <summary>
     /// Workflow data saved event
     /// </summary>
     public const string WorkflowDataSaved = "WorkflowDataSaved";
-
-    /// <summary>
-    /// Trigger fired event
-    /// </summary>
-    public const string TriggerFired = "TriggerFired";
-
-    /// <summary>
-    /// Workflow triggered event (a workflow was started by a trigger)
-    /// </summary>
-    public const string WorkflowTriggered = "WorkflowTriggered";
 
     /// <summary>
     /// Workflow execution result event (success or failure)

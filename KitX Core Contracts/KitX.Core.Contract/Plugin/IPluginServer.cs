@@ -51,11 +51,6 @@ public interface IPluginServer
     event EventHandler<int>? PortChanged;
 
     /// <summary>
-    /// Event raised when a plugin connects
-    /// </summary>
-    event EventHandler<PluginConnectedEventArgs>? PluginConnected;
-
-    /// <summary>
     /// Event raised when a plugin disconnects
     /// </summary>
     event EventHandler<PluginDisconnectedEventArgs>? PluginDisconnected;
