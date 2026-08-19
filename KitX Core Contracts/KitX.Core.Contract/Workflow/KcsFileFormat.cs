@@ -26,8 +26,14 @@ namespace KitX.Core.Contract.Workflow;
 //
 // Kept envelope fields (NOT derivable from IR):
 //   Id / Name / Description / Author / timestamps — workflow identity/metadata
-//   TriggerConfig                                  — deployment/runtime concern
 //   VariableConstants                              — user overrides on IrConstant
+//
+// The legacy per-file TriggerConfig envelope (v5-era trigger hint) was retired with
+// the old standalone-workflow storage system (D2). Trigger relationships now live in
+// the ToolKit config (Data/Toolkits/{id}/toolkit.json Triggers[]), not in the .kcs.
+// Old .kcs files that still carry a "triggerConfig" JSON field are read tolerantly —
+// System.Text.Json ignores unknown properties by default, so the leftover field is
+// silently dropped on load.
 //
 // Migration: KitX.WorkflowMigrator converts v1 → v2 (BS → parse → IR → serialize).
 // ─────────────────────────────────────────────────────────────────────────────
@@ -66,11 +72,6 @@ public class KcsFileFormat
     /// 最后修改时间
     /// </summary>
     public DateTime LastModifiedTime { get; set; } = DateTime.UtcNow;
-
-    /// <summary>
-    /// 触发器配置（包含触发类型、插件名、触发器名等结构化字段）
-    /// </summary>
-    public TriggerConfig? TriggerConfig { get; set; }
 
     /// <summary>
     /// 可变常量及其用户修改后的值。IR 的 <c>Constants</c> 存默认值，这里只存用户的覆盖值。
