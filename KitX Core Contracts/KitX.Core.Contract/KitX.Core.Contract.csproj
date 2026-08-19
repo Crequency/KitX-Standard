@@ -41,6 +41,11 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\Reference\Common.Activity\Common.Activity\Common.Activity.csproj" Condition="Exists('..\..\..\Reference\Common.Activity\Common.Activity\Common.Activity.csproj')" />
+        <PackageReference Include="Common.Activity" Version="1.1.6509.914" Condition="!Exists('..\..\..\Reference\Common.Activity\Common.Activity\Common.Activity.csproj')" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\..\Reference\Common.BasicHelper\Common.BasicHelper\Common.BasicHelper.csproj" />
         <ProjectReference Include="..\..\KitX Shared\KitX.Shared.CSharp\KitX.Shared.CSharp.csproj" />
     </ItemGroup>

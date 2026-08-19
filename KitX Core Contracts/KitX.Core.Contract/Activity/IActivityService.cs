@@ -45,6 +45,22 @@ public interface IActivityService
     IActivityStatistics GetStatistics(DateTime startDate, DateTime endDate);
 
     /// <summary>
+    /// Reads activities from the current-month collection, newest-first (by descending row
+    /// Id). Pass <paramref name="limit"/> &lt;= 0 to return every row; otherwise a
+    /// reverse-chronological page of <paramref name="limit"/> rows starting at
+    /// <paramref name="skip"/>.
+    /// </summary>
+    /// <param name="limit">Maximum rows to return; &lt;= 0 means all.</param>
+    /// <param name="skip">Rows to skip (used for paging after the first page).</param>
+    /// <returns>List of rich activity rows, newest-first.</returns>
+    IList<Common.Activity.Activity> ReadActivities(int limit = 0, int skip = 0);
+
+    /// <summary>
+    /// Total number of recorded activities in the current-month collection.
+    /// </summary>
+    long CountActivities();
+
+    /// <summary>
     /// Event raised when activities are updated
     /// </summary>
     event EventHandler? ActivitiesUpdated;
