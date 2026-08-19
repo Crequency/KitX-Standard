@@ -52,6 +52,11 @@ public interface IAppConfig
     /// Gets or sets the loaders configuration
     /// </summary>
     ILoadersConf Loaders { get; set; }
+
+    /// <summary>
+    /// Gets or sets the performance configuration
+    /// </summary>
+    IPerformanceConf Performance { get; set; }
 }
 
 /// <summary>
