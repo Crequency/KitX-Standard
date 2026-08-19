@@ -1,6 +1,7 @@
 using System;
 using KitX.Shared.CSharp.Plugin;
 using KitX.Core.Contract.Device;
+using KitX.Core.Contract.Plugin.Events;
 using CTask = System.Threading.Tasks.Task;
 
 namespace KitX.Core.Contract.Plugin;
@@ -21,9 +22,13 @@ public interface IPluginConnection : IPluginConnector
     ServerStatus Status { get; }
 
     /// <summary>
-    /// Event raised when a message is received
+    /// Event raised when a message is received. The event args carry the raw
+    /// <see cref="PluginMessageReceivedEventArgs.Message"/> and, when the source parsed it,
+    /// the already-deserialized <see cref="PluginMessageReceivedEventArgs.Request"/> and
+    /// <see cref="PluginMessageReceivedEventArgs.Command"/> so downstream handlers do not
+    /// re-deserialize the same message.
     /// </summary>
-    event EventHandler<string>? MessageReceived;
+    event EventHandler<PluginMessageReceivedEventArgs>? MessageReceived;
 
     /// <summary>
     /// Event raised when connection is closed

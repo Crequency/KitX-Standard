@@ -1,5 +1,6 @@
 using System;
 using KitX.Shared.CSharp.Plugin;
+using KitX.Shared.CSharp.WebCommand;
 
 namespace KitX.Core.Contract.Plugin.Events;
 
@@ -108,4 +109,24 @@ public class PluginMessageReceivedEventArgs : EventArgs
     /// Gets or sets the message
     /// </summary>
     public string? Message { get; set; }
+
+    /// <summary>
+    /// Gets or sets the already-deserialized request, when the raising source parsed it.
+    /// <see langword="null"/> means the message was not parsed and consumers must deserialize
+    /// <see cref="Message"/> themselves.
+    /// </summary>
+    public Request? Request { get; set; }
+
+    /// <summary>
+    /// Gets or sets the already-deserialized command, when the raising source parsed it.
+    /// <see langword="null"/> means the command was not parsed and consumers must deserialize
+    /// it from <see cref="Request.Content"/> themselves.
+    /// </summary>
+    public Command? Command { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the message is a plugin response (carries a
+    /// <c>RequestId</c> tag). <see langword="null"/> when the source did not determine it.
+    /// </summary>
+    public bool? IsResponse { get; set; }
 }
