@@ -13,4 +13,6 @@ public static class CommandRequestInfo
     public const string RequestCommand = "RequestCommand";
 
     public const string ReceiveCommand = "ReceiveCommand";
+
+    public const string TriggerFired = "TriggerFired";
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using KitX.Shared.CSharp.WebCommand.Infos;
 
 namespace KitX.Shared.CSharp.WebCommand;
@@ -149,6 +150,22 @@ public static class RequestBuilderExtensions
         builder = builder.UpdateCommand(cmd =>
         {
             cmd.Request = CommandRequestInfo.ReceiveCommand;
+
+            return cmd;
+        });
+
+        return builder;
+    }
+
+    public static RequestBuilder TriggerFired(this RequestBuilder builder, string triggerName)
+    {
+        builder = builder.UpdateCommand(cmd =>
+        {
+            cmd.Request = CommandRequestInfo.TriggerFired;
+
+            cmd.Tags ??= new Dictionary<string, string>();
+
+            cmd.Tags["TriggerName"] = triggerName;
 
             return cmd;
         });
