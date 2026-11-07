@@ -23,4 +23,11 @@ public interface IPerformanceConf
     /// bounded. Read at startup and by the Panel host when building a control.
     /// </summary>
     int PanelLogLimit { get; set; }
+
+    /// <summary>
+    /// Machine-wide cap on concurrently-running ToolKit flows, summed across every mounted
+    /// ToolKit. A trigger that would exceed it is rejected with code <c>concurrency-limit</c>.
+    /// Zero or negative means unlimited. Applies at startup.
+    /// </summary>
+    int MaxConcurrentFlows { get; set; }
 }
