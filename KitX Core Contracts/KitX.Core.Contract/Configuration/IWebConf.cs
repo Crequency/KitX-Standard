@@ -14,6 +14,14 @@ public interface IWebConf
     List<string>? AcceptedNetworkInterfaces { get; set; }
     int? UserSpecifiedDevicesServerPort { get; set; }
     int? UserSpecifiedPluginsServerPort { get; set; }
+
+    /// <summary>The port the View protocol listens on; null or 0 means it does not listen.</summary>
+    /// <remarks>
+    /// Declared here because the desktop reads configuration through this interface, and a member
+    /// added only to <c>Config_Web</c> would be invisible to every caller that takes the interface —
+    /// which is all of them.
+    /// </remarks>
+    int? UserSpecifiedViewServerPort { get; set; }
     int UdpPortSend { get; set; }
     int UdpPortReceive { get; set; }
     int UdpSendFrequency { get; set; }
